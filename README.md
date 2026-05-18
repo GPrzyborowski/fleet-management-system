@@ -6,8 +6,6 @@ Logistics fleet management system with vehicle usage control, technical conditio
 
 In Development
 
----
-
 ## Planned Features
 
 - Vehicle management
@@ -17,8 +15,6 @@ In Development
 - Photo documentation
 - Email notifications
 - AI-based damage analysis
-
----
 
 ## Planned Technologies
 
