@@ -3,6 +3,7 @@ CREATE TABLE users (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     phone_number VARCHAR(15),
     role VARCHAR(20) DEFAULT 'driver',
     is_active BOOLEAN DEFAULT TRUE,
