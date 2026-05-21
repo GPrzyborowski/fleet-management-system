@@ -1,4 +1,5 @@
 import express from 'express'
+import prisma from './config/prisma-client'
 
 const app = express()
 
@@ -6,6 +7,15 @@ app.use(express.json())
 
 app.get('/health', (req, res) => {
 	res.status(200).send('ok')
+})
+
+app.get('/ready', async (req, res) => {
+	try {
+		await prisma.$queryRaw`SELECT 1`
+		res.status(200).json({ status: 'ok', db: 'connected' })
+	} catch {
+		res.status(503).json({ status: 'error', db: 'disconnected' })
+	}
 })
 
 app.listen(3000, () => {
