@@ -1,0 +1,88 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model service_intervals {
+  id                   Int       @id @default(autoincrement())
+  vehicle_id           Int?
+  element_name         String    @db.VarChar(50)
+  interval_km          Int?
+  interval_months      Int?
+  last_service_mileage Int       @default(0)
+  last_service_date    DateTime  @db.Date
+  vehicles             vehicles? @relation(fields: [vehicle_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([vehicle_id, element_name])
+}
+
+model service_logs {
+  id              Int       @id @default(autoincrement())
+  vehicle_id      Int?
+  element_name    String    @db.VarChar(50)
+  service_date    DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  service_mileage Int
+  description     String?
+  cost            Decimal?  @db.Decimal(10, 2)
+  vehicles        vehicles? @relation(fields: [vehicle_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users {
+  id                  Int                   @id @default(autoincrement())
+  first_name          String                @db.VarChar(50)
+  last_name           String                @db.VarChar(50)
+  email               String                @unique @db.VarChar(100)
+  phone_number        String?               @db.VarChar(15)
+  role                String?               @default("driver") @db.VarChar(20)
+  is_active           Boolean?              @default(true)
+  created_at          DateTime?             @default(now()) @db.Timestamp(6)
+  vehicle_assignments vehicle_assignments[]
+}
+
+model vehicle_assignments {
+  id                  Int       @id @default(autoincrement())
+  vehicle_id          Int?
+  driver_id           Int?
+  start_time          DateTime  @default(now()) @db.Timestamp(6)
+  end_time            DateTime? @db.Timestamp(6)
+  start_mileage       Int
+  end_mileage         Int?
+  start_fuel_level    Int
+  end_fuel_level      Int?
+  dashboard_image_url String?
+  status              String?   @default("active") @db.VarChar(25)
+  users               users?    @relation(fields: [driver_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  vehicles            vehicles? @relation(fields: [vehicle_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+}
+
+model vehicle_status_images {
+  id             Int       @id @default(autoincrement())
+  vehicle_id     Int?
+  side           String    @db.VarChar(20)
+  azure_blob_url String
+  updated_at     DateTime? @default(now()) @db.Timestamp(6)
+  vehicles       vehicles? @relation(fields: [vehicle_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([vehicle_id, side])
+}
+
+model vehicles {
+  id                    Int                     @id @default(autoincrement())
+  license_plate         String                  @unique @db.VarChar(15)
+  brand                 String                  @db.VarChar(50)
+  model                 String                  @db.VarChar(50)
+  year_of_manufacture   Int
+  current_mileage       Int                     @default(0)
+  current_fuel_level    Int                     @default(100)
+  status                String?                 @default("available") @db.VarChar(20)
+  created_at            DateTime?               @default(now()) @db.Timestamp(6)
+  service_intervals     service_intervals[]
+  service_logs          service_logs[]
+  vehicle_assignments   vehicle_assignments[]
+  vehicle_status_images vehicle_status_images[]
+}
