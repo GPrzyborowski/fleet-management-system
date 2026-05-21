@@ -1,0 +1,30 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: fleet_postgres_dev
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: fleet_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - fleet-network
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: fleet_redis_dev
+    ports:
+      - '6379:6379'
+    networks:
+      - fleet-network
+
+volumes:
+  pgdata:
+
+networks:
+  fleet-network:
+    driver: bridge
