@@ -9,7 +9,8 @@
 		"start": "node dist/app.js",
 		"test": "vitest",
 		"test:run": "vitest run",
-		"test:coverage": "vitest run --coverage"
+		"test:coverage": "vitest run --coverage",
+		"lint": "eslint ."
 	},
 	"keywords": [],
 	"author": "Gabriel Przyborowski",
@@ -25,6 +26,7 @@
 		"pg": "^8.21.0"
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@types/bcrypt": "^6.0.0",
 		"@types/express": "^5.0.6",
 		"@types/jest": "^30.0.0",
@@ -32,11 +34,15 @@
 		"@types/node": "^25.9.1",
 		"@types/pg": "^8.20.0",
 		"@types/supertest": "^7.2.0",
+		"eslint": "^10.4.0",
+		"globals": "^17.6.0",
+		"jiti": "^2.7.0",
 		"prisma": "^7.8.0",
 		"supertest": "^7.2.2",
 		"ts-node-dev": "^2.0.0",
 		"tsx": "^4.22.3",
 		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.59.4",
 		"vitest": "^4.1.7"
 	}
 }
