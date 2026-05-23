@@ -1,5 +1,6 @@
 import express from 'express'
 import prisma from './config/prisma-client'
+import auth from './routes/auth.routes'
 
 const app = express()
 
@@ -17,6 +18,8 @@ app.get('/ready', async (req, res) => {
 		res.status(503).json({ status: 'error', db: 'disconnected' })
 	}
 })
+
+app.use('/api', auth)
 
 app.listen(3000, () => {
 	console.log('Server running on port 3000')
