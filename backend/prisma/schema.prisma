@@ -34,6 +34,7 @@ model service_logs {
 
 model users {
   id                  Int                   @id @default(autoincrement())
+  login               String                @unique @db.VarChar(50)
   first_name          String                @db.VarChar(50)
   last_name           String                @db.VarChar(50)
   email               String                @unique @db.VarChar(100)
