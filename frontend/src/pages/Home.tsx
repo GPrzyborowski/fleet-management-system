@@ -1,11 +1,16 @@
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
+import PageTransition from '../components/PageTransition'
 
 export default function Home() {
 	return (
-		<>
+		<PageTransition>
 			<Header text="Fleet management system" />
-			<img className="mb-32 lg:mb-24 mx-auto" src="/hero.png" alt="trucks standing next to each other" />
+			<img
+				className="mb-32 lg:mb-24 mx-auto w-full max-w-4xl h-auto px-4"
+				src="/hero.png"
+				alt="trucks standing next to each other"
+			/>
 			<div className="flex justify-center">
 				<Link
 					to="/login"
@@ -13,6 +18,6 @@ export default function Home() {
 					Go to dashboard
 				</Link>
 			</div>
-		</>
+		</PageTransition>
 	)
 }
