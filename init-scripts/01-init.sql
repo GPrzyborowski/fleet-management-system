@@ -1,5 +1,6 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
+    login VARCHAR(50) UNIQUE NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -64,4 +65,22 @@ CREATE TABLE service_logs (
     service_mileage INT NOT NULL,
     description TEXT,
     cost DECIMAL(10, 2)
+);
+
+INSERT INTO users (
+    login,
+    first_name,
+    last_name,
+    email,
+    password_hash,
+    phone_number,
+    role
+) VALUES (
+    'admin',
+    'Admin',
+    'User',
+    'admin@example.com',
+    '$2b$10$cJ3cQlccPsFeeaD/G2IKx.3McGOVhn0FUk/k/rZ1XQ3bMsvH6HJI.',
+    '123456789',
+    'manager'
 );
