@@ -4,15 +4,16 @@ import type { FormEvent } from 'react'
 interface LoginFormProps {
 	submitLogin: (login: string, password: string) => Promise<void>
 	errorMsg: string
+	pending: boolean
 }
 
-export default function LoginForm({ submitLogin, errorMsg }: LoginFormProps) {
+export default function LoginForm({ submitLogin, errorMsg, pending }: LoginFormProps) {
 	const [login, setLogin] = useState('')
 	const [password, setPassword] = useState('')
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault()
-		submitLogin(login, password)
+		await submitLogin(login, password)
 	}
 
 	return (
@@ -45,8 +46,8 @@ export default function LoginForm({ submitLogin, errorMsg }: LoginFormProps) {
 				<div className="flex justify-center pt-4">
 					<button
 						type="submit"
-						className="btn btn-accent w-full sm:w-auto px-12 py-6 mt-4 text-white shadow-md hover:bg-primary-focus transition-colors flex items-center justify-center no-underline">
-						Sign In
+						className={`btn btn-accent ${pending == true ? 'btn-disabled' : ''} w-full sm:w-auto min-w-[160px] px-12 py-6 mt-4 text-white shadow-md hover:bg-primary-focus transition-colors flex items-center justify-center no-underline`}>
+						{pending == true ? <span className="loading loading-spinner loading-lg"></span> : 'Sign in'}
 					</button>
 				</div>
 				{errorMsg && <span className="text-error text-sm md:text-base text-center block mt-8">{errorMsg}</span>}
