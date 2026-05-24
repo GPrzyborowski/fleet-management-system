@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { jwtDecode } from 'jwt-decode'
 import PageTransition from '../components/PageTransition'
@@ -7,15 +7,13 @@ import Navbar from '../components/Navbar'
 import ActionCard from '../components/ActionCard'
 
 interface TokenPayload {
-	userId: number
+	id: number
 	login: string
 	role: string
 	exp: number
 }
 
 export default function Dashboard() {
-	const [login, setLogin] = useState('')
-	const [role, setRole] = useState('')
 
 	const navigate = useNavigate()
 
@@ -24,19 +22,21 @@ export default function Dashboard() {
 		navigate('/')
 	}
 
-	useEffect(() => {
-		const token = localStorage.getItem('token')
+	const token = localStorage.getItem('token')
+	const decoded = useMemo(() => {
 		if (!token) {
 			return
 		}
 		try {
-			const decoded = jwtDecode<TokenPayload>(token)
-			setLogin(decoded.login)
-			setRole(decoded.role)
+			return jwtDecode<TokenPayload>(token)
 		} catch (err) {
 			console.error(err)
+            return null
 		}
-	}, [])
+	}, [token])
+
+    const login = decoded?.login
+    const role = decoded?.role
 
 	return (
 		<PageTransition>
