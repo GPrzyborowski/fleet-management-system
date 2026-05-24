@@ -14,7 +14,6 @@ interface TokenPayload {
 }
 
 export default function Dashboard() {
-
 	const navigate = useNavigate()
 
 	const handleLogout = () => {
@@ -31,12 +30,12 @@ export default function Dashboard() {
 			return jwtDecode<TokenPayload>(token)
 		} catch (err) {
 			console.error(err)
-            return null
+			return null
 		}
 	}, [token])
 
-    const login = decoded?.login ?? ''
-    const role = decoded?.role ?? ''
+	const login = decoded?.login ?? ''
+	const role = decoded?.role ?? ''
 
 	return (
 		<PageTransition>
@@ -44,8 +43,18 @@ export default function Dashboard() {
 			<Header text={`Hello ${login}`} />
 			{role == 'manager' && (
 				<div className="px-4 sm:px-12 md:px-18 lg:px-34 xl:px-54 xl:mt-34 grid grid-cols-1 gap-4 max-w-5xl mx-auto">
-					<ActionCard title="Employees" description="Employees management panel." icon="icon-[tabler--user]" />
-					<ActionCard title="Vehicles" description="Vehicles management panel." icon="icon-[tabler--truck]" />
+					<ActionCard
+						title="Employees"
+						description="Employees management panel."
+						icon="icon-[tabler--user]"
+						links="employees"
+					/>
+					<ActionCard
+						title="Vehicles"
+						description="Vehicles management panel."
+						icon="icon-[tabler--truck]"
+						links="vehicles"
+					/>
 				</div>
 			)}
 		</PageTransition>
