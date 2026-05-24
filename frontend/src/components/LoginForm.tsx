@@ -17,7 +17,7 @@ export default function LoginForm({ submitLogin, errorMsg, pending }: LoginFormP
 	}
 
 	return (
-		<div className="flex flex-col items-center w-full px-4 sm:px-6 sm:mt-32">
+		<div className="flex flex-col items-center w-full px-6">
 			<form onSubmit={handleSubmit} className="w-full max-w-sm space-y-2">
 				<div className="form-control w-full">
 					<label className="label pt-0 pl-1">

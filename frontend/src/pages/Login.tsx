@@ -35,6 +35,11 @@ export default function Login() {
 		<PageTransition>
 			<Header text="Log in to your account" />
 			<LoginForm submitLogin={submitLogin} errorMsg={errorMsg} pending={pending} />
+			<img
+				className="mx-auto mt-12 sm:mt-14 w-full max-w-[280px] max-w-xl sm:max-w-2xl h-auto px-4"
+				src="/hero_login.png"
+				alt="truck with a lock"
+			/>
 		</PageTransition>
 	)
 }
