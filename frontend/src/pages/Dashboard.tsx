@@ -35,8 +35,8 @@ export default function Dashboard() {
 		}
 	}, [token])
 
-    const login = decoded?.login
-    const role = decoded?.role
+    const login = decoded?.login ?? ''
+    const role = decoded?.role ?? ''
 
 	return (
 		<PageTransition>
