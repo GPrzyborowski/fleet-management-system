@@ -12,7 +12,6 @@ describe('Login page', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 	})
-
 	it('logs in successfully', async () => {
 		globalThis.fetch = vi.fn(() =>
 			Promise.resolve({
@@ -23,19 +22,14 @@ describe('Login page', () => {
 					}),
 			}),
 		) as Mock
-
 		render(<Login />)
-
 		fireEvent.change(screen.getByPlaceholderText('John Doe'), {
 			target: { value: 'admin' },
 		})
-
 		fireEvent.change(screen.getByPlaceholderText('Super secret password'), {
 			target: { value: 'password123' },
 		})
-
 		fireEvent.click(screen.getByRole('button', { name: /sign in/i }))
-
 		await waitFor(() => {
 			expect(localStorage.getItem('token')).toBe('fake-token')
 			expect(mockNavigate).toHaveBeenCalledWith('/dashboard')
@@ -49,21 +43,22 @@ describe('Login page', () => {
 				json: () => Promise.resolve({}),
 			}),
 		) as Mock
-
 		render(<Login />)
-
 		fireEvent.change(screen.getByPlaceholderText('John Doe'), {
 			target: { value: 'admin' },
 		})
-
 		fireEvent.change(screen.getByPlaceholderText('Super secret password'), {
 			target: { value: 'wrong-password' },
 		})
-
 		fireEvent.click(screen.getByRole('button', { name: /sign in/i }))
-
 		await waitFor(() => {
 			expect(screen.getByText('Invalid login or password.')).toBeInTheDocument()
 		})
+	})
+	it('renders hero image', () => {
+		render(<Login />)
+		const image = screen.getByAltText('truck with a lock')
+		expect(image).toBeInTheDocument()
+		expect(image).toHaveAttribute('src', '/hero_login.png')
 	})
 })
