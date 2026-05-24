@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@tailwindcss/vite": "^4.3.0",
 		"framer-motion": "^12.40.0",
+		"jwt-decode": "^4.0.0",
 		"react": "^19.2.6",
 		"react-dom": "^19.2.6",
 		"react-router-dom": "^7.15.1",
@@ -22,6 +23,8 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
+		"@iconify-json/tabler": "^1.2.35",
+		"@iconify/tailwind4": "^1.2.3",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.2",
 		"@testing-library/user-event": "^14.6.1",

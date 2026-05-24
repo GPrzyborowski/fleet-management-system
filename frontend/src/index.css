@@ -2,6 +2,7 @@
 @plugin "flyonui";
 @import "../node_modules/flyonui/variants.css";
 @source "../node_modules/flyonui/dist/index.js";
+@plugin "@iconify/tailwind4";
 
 body {
 	font-family: 'Inter', sans-serif;
