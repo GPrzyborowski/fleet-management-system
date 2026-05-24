@@ -7,9 +7,11 @@ import { useState } from 'react'
 
 export default function Login() {
 	const [errorMsg, setErrorMsg] = useState('')
+	const [pending, setPending] = useState(false)
 	const navigate = useNavigate()
 	const submitLogin = async (login: string, password: string): Promise<void> => {
 		try {
+			setPending(true)
 			const res = await fetch(`${API_URL}/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -20,9 +22,11 @@ export default function Login() {
 				localStorage.setItem('token', data.token)
 				navigate('/dashboard')
 			} else {
+				setPending(false)
 				setErrorMsg('Invalid login or password.')
 			}
 		} catch (err) {
+			setPending(false)
 			console.error(err)
 		}
 	}
@@ -30,7 +34,7 @@ export default function Login() {
 	return (
 		<PageTransition>
 			<Header text="Log in to your account" />
-			<LoginForm submitLogin={submitLogin} errorMsg={errorMsg} />
+			<LoginForm submitLogin={submitLogin} errorMsg={errorMsg} pending={pending} />
 		</PageTransition>
 	)
 }
