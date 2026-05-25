@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import PageTransition from '../components/PageTransition'
 import Header from '../components/Header'
 import EmployeeRow from '../components/EmployeeRow'
+import NewEmployeeModal from '../components/NewEmployeeModal'
 import { API_URL } from '../config/api'
 
 type Employee = {
@@ -22,8 +23,31 @@ export default function Employees() {
 	const [pending, setPending] = useState(true)
 	const [refreshTrigger, setRefreshTrigger] = useState(0)
 
-	const capitalizeFirstLetter = (word: string) => {
-		return String(word).charAt(0).toUpperCase() + String(word).slice(1)
+	const addEmployee = async (
+		login: string,
+		firstName: string,
+		lastName: string,
+		email: string,
+		password: string,
+		phone: string,
+		role: string,
+	) => {
+		try {
+			const res = await fetch(`${API_URL}/employees`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ login, firstName, lastName, email, password, phone, role }),
+			})
+			if (res.ok) {
+				const { HSOverlay } = await import('flyonui/flyonui')
+				HSOverlay.close('#new-employee-modal')
+			}
+		} catch (err) {
+			console.error(err)
+		}
 	}
 
 	const updateEmployee = async (
@@ -84,47 +108,50 @@ export default function Employees() {
 			}
 		}
 		getEmployees()
-	}, [refreshTrigger])
+	}, [refreshTrigger, token])
 
 	return (
 		<PageTransition>
 			<Header text="Employees" />
-			<div className="w-full px-4 sm:px-12 lg:px-24 xl:px-32 overflow-x-auto flex justify-center">
+			<div className="w-full px-4 sm:px-12 lg:px-24 xl:px-32 overflow-x-auto flex flex-col justify-center">
 				{pending ? (
 					<span className="loading loading-spinner loading-xl"></span>
 				) : (
-					<table className="table">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Email</th>
-								<th>Role</th>
-								<th>Login</th>
-								<th>Phone</th>
-								<th>Status</th>
-							</tr>
-						</thead>
-						<tbody>
-							{employees.map(employee => {
-								return (
-									<EmployeeRow
-										key={employee.id}
-										id={employee.id}
-										firstName={employee.first_name}
-										lastName={employee.last_name}
-										email={employee.email}
-										role={capitalizeFirstLetter(employee.role)}
-										login={employee.login}
-										phone={employee.phone_number}
-										isActive={employee.is_active}
-										removeHandler={removeEmployee}
-										updateHandler={updateEmployee}
-										onUpdate={() => setRefreshTrigger(prev => prev + 1)}
-									/>
-								)
-							})}
-						</tbody>
-					</table>
+					<>
+						<NewEmployeeModal addHandler={addEmployee} onUpdate={() => setRefreshTrigger(prev => prev + 1)} />
+						<table className="table">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Email</th>
+									<th>Role</th>
+									<th>Login</th>
+									<th>Phone</th>
+									<th>Status</th>
+								</tr>
+							</thead>
+							<tbody>
+								{employees.map(employee => {
+									return (
+										<EmployeeRow
+											key={employee.id}
+											id={employee.id}
+											firstName={employee.first_name}
+											lastName={employee.last_name}
+											email={employee.email}
+											role={employee.role}
+											login={employee.login}
+											phone={employee.phone_number}
+											isActive={employee.is_active}
+											removeHandler={removeEmployee}
+											updateHandler={updateEmployee}
+											onUpdate={() => setRefreshTrigger(prev => prev + 1)}
+										/>
+									)
+								})}
+							</tbody>
+						</table>
+					</>
 				)}
 			</div>
 		</PageTransition>
