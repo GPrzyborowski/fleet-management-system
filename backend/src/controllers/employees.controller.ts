@@ -2,16 +2,6 @@ import { Request, Response } from 'express'
 import prisma from '../config/prisma-client'
 import bcrypt from 'bcrypt'
 
-type Employee = {
-	login: string
-	firstName: string
-	lastName: string
-	email: string
-	password: string
-	phone: string
-	role: string
-}
-
 export const addEmployee = async (req: Request, res: Response) => {
 	const { login, firstName, lastName, email, password, phone, role } = req.body
 	try {
