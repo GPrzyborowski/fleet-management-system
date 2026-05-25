@@ -1,10 +1,14 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-interface NavbarProps {
-	logoutHandler: () => void
-}
+export default function Navbar() {
 
-export default function Navbar({ logoutHandler }: NavbarProps) {
+	const navigate = useNavigate()
+
+	const handleLogout = () => {
+		localStorage.removeItem('token')
+		navigate('/')
+	}
+
 	return (
 		<nav className="navbar rounded-box shadow-base-300/20 shadow-sm">
 			<div className="w-full md:flex md:items-center md:gap-2">
@@ -33,7 +37,7 @@ export default function Navbar({ logoutHandler }: NavbarProps) {
 							</Link>
 						</li>
 						<li>
-							<button className="menu-item w-full" onClick={() => logoutHandler()}>
+							<button className="menu-item w-full" onClick={handleLogout}>
 								Log out
 							</button>
 						</li>
