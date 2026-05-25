@@ -20,9 +20,37 @@ export default function Employees() {
 	const token = localStorage.getItem('token')
 	const [employees, setEmployees] = useState<Employee[]>([])
 	const [pending, setPending] = useState(true)
+	const [refreshTrigger, setRefreshTrigger] = useState(0)
 
 	const capitalizeFirstLetter = (word: string) => {
 		return String(word).charAt(0).toUpperCase() + String(word).slice(1)
+	}
+
+	const updateEmployee = async (
+		id: number,
+		login: string,
+		firstName: string,
+		lastName: string,
+		email: string,
+		phone: string,
+		role: string,
+	) => {
+		try {
+			const res = await fetch(`${API_URL}/employees/${id}`, {
+				method: 'PATCH',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ login, firstName, lastName, email, phone, role }),
+			})
+			if (res.ok) {
+				const { HSOverlay } = await import('flyonui/flyonui')
+				HSOverlay.close(`#edit-employee-modal-${id}`)
+			}
+		} catch (err) {
+			console.error(err)
+		}
 	}
 
 	const removeEmployee = async (id: number) => {
@@ -56,7 +84,7 @@ export default function Employees() {
 			}
 		}
 		getEmployees()
-	}, [])
+	}, [refreshTrigger])
 
 	return (
 		<PageTransition>
@@ -90,6 +118,8 @@ export default function Employees() {
 										phone={employee.phone_number}
 										isActive={employee.is_active}
 										removeHandler={removeEmployee}
+										updateHandler={updateEmployee}
+										onUpdate={() => setRefreshTrigger(prev => prev + 1)}
 									/>
 								)
 							})}
