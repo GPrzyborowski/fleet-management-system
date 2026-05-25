@@ -11,6 +11,16 @@ type Props = {
 	role: string
 	isActive: boolean
 	removeHandler: (id: number) => void
+	updateHandler: (
+		id: number,
+		login: string,
+		firstName: string,
+		lastName: string,
+		email: string,
+		phone: string,
+		role: string,
+	) => Promise<void>
+	onUpdate: () => void
 }
 
 export default function EmployeeRow({
@@ -23,6 +33,8 @@ export default function EmployeeRow({
 	role,
 	isActive,
 	removeHandler,
+	updateHandler,
+	onUpdate,
 }: Props) {
 	useEffect(() => {
 		const init = async () => {
@@ -57,6 +69,8 @@ export default function EmployeeRow({
 					email={email}
 					phone={phone}
 					role={role}
+					updateHandler={updateHandler}
+					onUpdate={onUpdate}
 				/>
 				<button className="btn btn-circle btn-text btn-sm" aria-label="Action button" onClick={() => removeHandler(id)}>
 					<span className="icon-[tabler--trash] size-5"></span>
