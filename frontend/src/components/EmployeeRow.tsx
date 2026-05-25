@@ -44,20 +44,22 @@ export default function EmployeeRow({
 		init()
 	}, [])
 
+	const normalizedRole = role.toLowerCase()
+
 	return (
 		<tr>
 			<td>{`${firstName} ${lastName}`}</td>
 			<td>{email}</td>
 			<td>
-				<span className={`badge badge-soft ${role == 'Driver' ? 'badge-accent' : 'badge-default'} text-xs`}>
-					{role}
+				<span className={`badge badge-soft ${normalizedRole === 'driver' ? 'badge-accent' : 'badge-default'}`}>
+					{normalizedRole === 'driver' ? 'Driver' : 'Manager'}
 				</span>
 			</td>
 			<td>{login}</td>
 			<td>{phone}</td>
 			<td>
 				<span className={`badge badge-soft ${isActive ? 'badge-success' : 'badge-error'} text-xs`}>
-					{isActive ? 'Working' : 'Not working'}
+					{isActive ? 'Driving' : 'Not driving'}
 				</span>
 			</td>
 			<td>
@@ -72,10 +74,14 @@ export default function EmployeeRow({
 					updateHandler={updateHandler}
 					onUpdate={onUpdate}
 				/>
-				<button className="btn btn-circle btn-text btn-sm" aria-label="Action button" onClick={() => removeHandler(id)}>
+				<button
+					className="btn btn-circle btn-text btn-sm"
+					aria-label="Remove employee"
+					onClick={() => removeHandler(id)}>
 					<span className="icon-[tabler--trash] size-5"></span>
 				</button>
-				<button className="btn btn-circle btn-text btn-sm" aria-label="Action button">
+
+				<button className="btn btn-circle btn-text btn-sm" aria-label="Show employee logs">
 					<span className="icon-[tabler--logs] size-5"></span>
 				</button>
 			</td>
