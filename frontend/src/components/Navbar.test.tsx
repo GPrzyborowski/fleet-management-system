@@ -7,7 +7,7 @@ describe('LoginForm', () => {
 	it('renders navigation links and logout button', () => {
 		render(
 			<BrowserRouter>
-				<Navbar logoutHandler={vi.fn()} />
+				<Navbar />
 			</BrowserRouter>,
 		)
 		expect(screen.getByText('Dashboard')).toBeInTheDocument()
@@ -17,7 +17,7 @@ describe('LoginForm', () => {
 		const mockLogout = vi.fn()
 		render(
 			<BrowserRouter>
-				<Navbar logoutHandler={mockLogout} />
+				<Navbar />
 			</BrowserRouter>,
 		)
 		fireEvent.click(screen.getByRole('button', { name: /log out/i }))
@@ -26,7 +26,7 @@ describe('LoginForm', () => {
 	it('dashboard link points to dashboard route', () => {
 		render(
 			<BrowserRouter>
-				<Navbar logoutHandler={vi.fn()} />
+				<Navbar />
 			</BrowserRouter>,
 		)
 		const dashboardLink = screen.getByRole('link', { name: /dashboard/i })
@@ -35,7 +35,7 @@ describe('LoginForm', () => {
 	it('renders mobile menu toggle button', () => {
 		render(
 			<BrowserRouter>
-				<Navbar logoutHandler={vi.fn()} />
+				<Navbar />
 			</BrowserRouter>,
 		)
 		expect(screen.getByRole('button', { name: /toggle navigation/i })).toBeInTheDocument()
