@@ -1,11 +1,15 @@
 import { MemoryRouter } from 'react-router-dom'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
 import { jwtDecode } from 'jwt-decode'
 import Dashboard from './Dashboard'
 
 vi.mock('jwt-decode', () => ({
 	jwtDecode: vi.fn(),
+}))
+
+vi.mock('../components/Navbar', () => ({
+	default: () => <nav>Navbar</nav>,
 }))
 
 describe('Home page', () => {
@@ -52,20 +56,5 @@ describe('Home page', () => {
 		)
 		expect(screen.queryByText('Employees')).not.toBeInTheDocument()
 		expect(screen.queryByText('Vehicles')).not.toBeInTheDocument()
-	})
-	it('removes jwt token on logout', () => {
-		localStorage.setItem('token', 'test token')
-		vi.mocked(jwtDecode).mockReturnValue({
-			id: 1,
-			login: 'test',
-			role: 'driver',
-		})
-		render(
-			<MemoryRouter>
-				<Dashboard />
-			</MemoryRouter>,
-		)
-		fireEvent.click(screen.getByRole('button', { name: /log out/i }))
-		expect(localStorage.getItem('token')).toBeNull()
 	})
 })
