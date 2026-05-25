@@ -9,10 +9,10 @@ import Employees from './pages/Employees'
 
 function App() {
 	const location = useLocation()
-
+	const hideNavbar = ['/', '/login'].includes(location.pathname)
 	return (
 		<>
-			<Navbar />
+			{!hideNavbar && <Navbar />}
 			<AnimatePresence mode="wait">
 				<Routes location={location} key={location.pathname}>
 					<Route path="/" element={<Home />} />
