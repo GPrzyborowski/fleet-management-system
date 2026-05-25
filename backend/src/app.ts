@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import prisma from './config/prisma-client'
 import auth from './routes/auth.routes'
+import employees from './routes/employees.routes'
 
 const app = express()
 
@@ -17,7 +18,7 @@ app.use(
 			}
 		},
 		credentials: true,
-		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
 		allowedHeaders: ['Content-Type', 'Authorization'],
 	}),
 )
@@ -38,5 +39,6 @@ app.get('/ready', async (req, res) => {
 })
 
 app.use('/api', auth)
+app.use('/api', employees)
 
 export default app
