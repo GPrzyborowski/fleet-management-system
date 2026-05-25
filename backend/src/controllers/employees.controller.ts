@@ -26,7 +26,14 @@ export const addEmployee = async (req: Request, res: Response) => {
 
 export const getEmployees = async (req: Request, res: Response) => {
 	try {
-		const employees = await prisma.users.findMany()
+		const employees = await prisma.users.findMany({
+			where: {
+				is_employed: true,
+			},
+			omit: {
+				password_hash: true,
+			},
+		})
 		res.status(200).json(employees)
 	} catch (err) {
 		console.error(err)
