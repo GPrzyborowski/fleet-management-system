@@ -69,7 +69,7 @@ CREATE TABLE service_logs (
 );
 
 INSERT INTO users (login, first_name, last_name, email, password_hash, phone_number, role, is_active, is_employed) VALUES
-('admin', 'Admin', 'User', 'admin@example.com', '$2b$10$cJ3cQlccPsFeeaD/G2IKx.3McGOVhn0FUk/k/rZ1XQ3bMsvH6HJI.', '123456789', 'manager', true, true),
+('admin', 'Admin', 'User', 'isitestuser@proton.me', '$2b$10$cJ3cQlccPsFeeaD/G2IKx.3McGOVhn0FUk/k/rZ1XQ3bMsvH6HJI.', '123456789', 'manager', true, true),
 ('jkowalski', 'Jan', 'Kowalski', 'jkowalski@example.com', '$2b$10$cJ3cQlccPsFeeaD/G2IKx.3McGOVhn0FUk/k/rZ1XQ3bMsvH6HJI.', '500100200', 'driver', false, false),
 ('anowak', 'Anna', 'Nowak', 'anowak@example.com', '$2b$10$cJ3cQlccPsFeeaD/G2IKx.3McGOVhn0FUk/k/rZ1XQ3bMsvH6HJI.', '500100201', 'driver', false, true),
 ('pwisniew', 'Piotr', 'Wiśniewski', 'pwisniew@example.com', '$2b$10$cJ3cQlccPsFeeaD/G2IKx.3McGOVhn0FUk/k/rZ1XQ3bMsvH6HJI.', '500100202', 'driver', true, true),
