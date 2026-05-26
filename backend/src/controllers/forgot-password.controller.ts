@@ -4,9 +4,8 @@ import prisma from '../config/prisma-client'
 import redis from '../config/redis-client'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export const forgotPassword = async (req: Request, res: Response) => {
+	const resend = new Resend(process.env.RESEND_API_KEY)
 	try {
 		const { email }: { email: string } = req.body
 
@@ -30,7 +29,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 		})
 		return res.status(200).json({ message: 'If this email is correct, password reset link will be sent.' })
 	} catch (err) {
-        console.error(err)
+		console.error(err)
 		return res.status(500).json({ error: 'Server error.' })
 	}
 }
