@@ -3,6 +3,7 @@ import app from '../app'
 import { describe, it, expect, vi } from 'vitest'
 import prisma from '../config/prisma-client'
 import redis from '../config/redis-client'
+import type { users } from '../generated/prisma'
 
 vi.mock('../config/prisma-client', () => ({
 	default: {
@@ -44,7 +45,16 @@ describe('POST /api/forgot-password', () => {
 		vi.mocked(prisma.users.findUnique).mockResolvedValue({
 			id: 1,
 			email: 'user@test.com',
-		} as any)
+			login: 'testuser',
+			first_name: 'Test',
+			last_name: 'User',
+			password_hash: 'hash',
+			phone_number: null,
+			role: 'driver',
+			is_active: true,
+			is_employed: true,
+			created_at: new Date(),
+		} as users)
 		vi.mocked(redis.set).mockResolvedValue('OK')
 
 		const response = await request(app).post('/api/forgot-password').send({ email: 'test@test.test' })

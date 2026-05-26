@@ -3,6 +3,7 @@ import app from '../app'
 import { describe, it, expect, vi } from 'vitest'
 import prisma from '../config/prisma-client'
 import redis from '../config/redis-client'
+import type { users } from '../generated/prisma'
 
 vi.mock('../config/prisma-client', () => ({
 	default: {
@@ -45,7 +46,19 @@ describe('POST /api/reset-password', () => {
 
 	it('should return 200 and update password if token is valid', async () => {
 		vi.mocked(redis.get).mockResolvedValue('1')
-		vi.mocked(prisma.users.update).mockResolvedValue({ id: 1 } as any)
+		vi.mocked(prisma.users.update).mockResolvedValue({
+			id: 1,
+			email: 'user@test.com',
+			login: 'testuser',
+			first_name: 'Test',
+			last_name: 'User',
+			password_hash: 'hash',
+			phone_number: null,
+			role: 'driver',
+			is_active: true,
+			is_employed: true,
+			created_at: new Date(),
+		} as users)
 		vi.mocked(redis.del).mockResolvedValue(1)
 
 		const response = await request(app)
