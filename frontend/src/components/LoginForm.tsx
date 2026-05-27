@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { FormEvent } from 'react'
 
 interface LoginFormProps {
@@ -41,6 +42,7 @@ export default function LoginForm({ submitLogin, errorMsg, pending }: LoginFormP
 						className="input input-filled input-primary w-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 						onChange={e => setPassword(e.target.value)}
 					/>
+					 <Link to="/forgot-password"><span className="helper-text text-start">Forgot password</span></Link>
 				</div>
 
 				<div className="flex justify-center pt-4">
