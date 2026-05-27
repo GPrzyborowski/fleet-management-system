@@ -1,12 +1,17 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, type Mock } from 'vitest'
 import Login from './Login'
+import { MemoryRouter } from 'react-router-dom'
 
 const mockNavigate = vi.fn()
 
-vi.mock('react-router-dom', () => ({
-	useNavigate: () => mockNavigate,
-}))
+vi.mock('react-router-dom', async importOriginal => {
+	const actual = (await importOriginal()) as Record<string, unknown>
+	return {
+		...actual,
+		useNavigate: () => mockNavigate,
+	}
+})
 
 describe('Login page', () => {
 	beforeEach(() => {
@@ -22,7 +27,11 @@ describe('Login page', () => {
 					}),
 			}),
 		) as Mock
-		render(<Login />)
+		render(
+			<MemoryRouter>
+				<Login />
+			</MemoryRouter>,
+		)
 		fireEvent.change(screen.getByPlaceholderText('John Doe'), {
 			target: { value: 'admin' },
 		})
@@ -43,7 +52,11 @@ describe('Login page', () => {
 				json: () => Promise.resolve({}),
 			}),
 		) as Mock
-		render(<Login />)
+		render(
+			<MemoryRouter>
+				<Login />
+			</MemoryRouter>,
+		)
 		fireEvent.change(screen.getByPlaceholderText('John Doe'), {
 			target: { value: 'admin' },
 		})
@@ -56,7 +69,11 @@ describe('Login page', () => {
 		})
 	})
 	it('renders hero image', () => {
-		render(<Login />)
+		render(
+			<MemoryRouter>
+				<Login />
+			</MemoryRouter>,
+		)
 		const image = screen.getByAltText('truck with a lock')
 		expect(image).toBeInTheDocument()
 		expect(image).toHaveAttribute('src', '/hero_login.png')
