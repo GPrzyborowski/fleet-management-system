@@ -115,7 +115,9 @@ export default function Employees() {
 			<Header text="Employees" />
 			<div className="w-full px-4 sm:px-12 lg:px-24 xl:px-32 overflow-x-auto flex flex-col justify-center">
 				{pending ? (
-					<span className="loading loading-spinner loading-xl"></span>
+					<div className="flex justify-center">
+						<span className="loading loading-spinner loading-xl"></span>
+					</div>
 				) : (
 					<>
 						<NewEmployeeModal addHandler={addEmployee} onUpdate={() => setRefreshTrigger(prev => prev + 1)} />
