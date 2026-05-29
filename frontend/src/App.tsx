@@ -5,12 +5,13 @@ import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Employees from './pages/Employees'
 
 function App() {
 	const location = useLocation()
-	const hideNavbar = ['/', '/login', '/forgot-password'].includes(location.pathname)
+	const hideNavbar = ['/', '/login', '/forgot-password', '/reset-password'].includes(location.pathname)
 	return (
 		<>
 			{!hideNavbar && <Navbar />}
@@ -19,6 +20,7 @@ function App() {
 					<Route path="/" element={<Home />} />
 					<Route path="/login" element={<Login />} />
 					<Route path="/forgot-password" element={<ForgotPassword />} />
+					<Route path="/reset-password" element={<ResetPassword />} />
 					<Route
 						path="/dashboard"
 						element={
