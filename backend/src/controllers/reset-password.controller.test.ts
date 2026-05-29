@@ -68,6 +68,6 @@ describe('POST /api/reset-password', () => {
 		expect(response.status).toBe(200)
 		expect(prisma.users.update).toHaveBeenCalled()
 		expect(redis.del).toHaveBeenCalledWith('reset:valid-token')
-		expect(response.body.message).toBe('Successfully reset the password.')
+		expect(response.body.message).toBe('Password has been reset. You can now log in.')
 	})
 })
