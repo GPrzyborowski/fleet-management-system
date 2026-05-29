@@ -1,20 +1,21 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import type { FormEvent } from 'react'
 
-interface LoginFormProps {
-	submitLogin: (login: string, password: string) => Promise<void>
+interface PasswordFormProps {
+	submitPassword: (token: string, newPassword: string) => Promise<void>
+	token: string
+	successMsg: string
 	errorMsg: string
 	pending: boolean
 }
 
-export default function LoginForm({ submitLogin, errorMsg, pending }: LoginFormProps) {
-	const [login, setLogin] = useState('')
-	const [password, setPassword] = useState('')
+export default function ResetPasswordForm({ submitPassword, token, successMsg, errorMsg, pending }: PasswordFormProps) {
+	const [newPassword, setNewPassword] = useState('')
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault()
-		await submitLogin(login, password)
+		await submitPassword(token, newPassword)
+		setNewPassword('')
 	}
 
 	return (
@@ -22,36 +23,29 @@ export default function LoginForm({ submitLogin, errorMsg, pending }: LoginFormP
 			<form onSubmit={handleSubmit} className="w-full max-w-sm space-y-2">
 				<div className="form-control w-full">
 					<label className="label pt-0 pl-1">
-						<span className="label-text font-medium cursor-text">Login</span>
-					</label>
-					<input
-						type="text"
-						placeholder="John Doe"
-						className="input input-filled input-primary w-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-						onChange={e => setLogin(e.target.value)}
-					/>
-				</div>
-
-				<div className="form-control w-full">
-					<label className="label pt-0 pl-1">
-						<span className="label-text font-medium cursor-text">Password</span>
+						<span className="label-text font-medium cursor-text">New password</span>
 					</label>
 					<input
 						type="password"
+						value={newPassword}
 						placeholder="Super secret password"
 						className="input input-filled input-primary w-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-						onChange={e => setPassword(e.target.value)}
+						onChange={e => setNewPassword(e.target.value)}
 					/>
-					 <Link to="/forgot-password"><span className="helper-text text-start">Forgot password</span></Link>
 				</div>
 
 				<div className="flex justify-center pt-4">
 					<button
 						type="submit"
 						className={`btn btn-accent ${pending == true ? 'btn-disabled' : ''} w-full sm:w-auto min-w-[160px] px-12 py-6 mt-4 text-white shadow-md hover:bg-primary-focus transition-colors flex items-center justify-center no-underline`}>
-						{pending == true ? <span className="loading loading-spinner loading-lg"></span> : 'Sign in'}
+						{pending == true ? <span className="loading loading-spinner loading-lg"></span> : 'Set new password'}
 					</button>
 				</div>
+				{successMsg && (
+					<span className="text-success text-sm md:text-base text-center block mt-8 whitespace-nowrap">
+						{successMsg}
+					</span>
+				)}
 				{errorMsg && <span className="text-error text-sm md:text-base text-center block mt-8">{errorMsg}</span>}
 			</form>
 		</div>

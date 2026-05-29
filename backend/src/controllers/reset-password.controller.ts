@@ -20,7 +20,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 		})
 
 		await redis.del(`reset:${token}`)
-		return res.status(200).json({ message: 'Successfully reset the password.' })
+		return res.status(200).json({ message: 'Password has been reset. You can now log in.' })
 	} catch (err) {
 		console.error(err)
 		return res.status(500).json({ error: 'Server error.' })
