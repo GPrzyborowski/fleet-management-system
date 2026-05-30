@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Header from '../components/Header'
 import VehicleRow from '../components/VehicleRow'
+import NewVehicleModal from '../components/NewVehicleModal'
 import PageTransition from '../components/PageTransition'
 import { API_URL } from '../config/api'
 
@@ -9,7 +10,7 @@ type Vehicle = {
 	license_plate: string
 	brand: string
 	model: string
-	year_of_manufacture: string
+	year_of_manufacture: number
 	current_mileage: number
 	status: string
 }
@@ -39,12 +40,39 @@ export default function Vehicles() {
 		getEmployees()
 	}, [refreshTrigger, token])
 
+	const addVehicle = async (
+		licensePlate: string,
+		brand: string,
+		model: string,
+		year: number,
+		mileage: number,
+		fuelLevel: number,
+		status: string,
+	) => {
+		try {
+			const res = await fetch(`${API_URL}/vehicles`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ licensePlate, brand, model, year, mileage, fuelLevel, status }),
+			})
+			if (res.ok) {
+				const { HSOverlay } = await import('flyonui/flyonui')
+				HSOverlay.close('#new-vehicle-modal')
+			}
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
 	const updateVehicle = async (
 		id: number,
 		licensePlate: string,
 		brand: string,
 		model: string,
-		year: string,
+		year: number,
 		status: string,
 	) => {
 		try {
@@ -89,6 +117,9 @@ export default function Vehicles() {
 					</div>
 				) : (
 					<>
+						<div className="flex justify-end mb-4">
+							<NewVehicleModal addHandler={addVehicle} onUpdate={() => setRefreshTrigger(prev => prev + 1)} />
+						</div>
 						<table className="table">
 							<thead>
 								<tr>
