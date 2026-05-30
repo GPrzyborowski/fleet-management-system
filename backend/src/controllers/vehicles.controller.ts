@@ -13,6 +13,28 @@ export const getVehicles = async (req: Request, res: Response) => {
 	}
 }
 
+export const addVehicle = async (req: Request, res: Response) => {
+	const { licensePlate, brand, model, year, mileage, fuelLevel, status } = req.body
+	try {
+		await prisma.vehicles.create({
+			data: {
+				license_plate: licensePlate,
+				brand,
+				model,
+				year_of_manufacture: Number(year),
+				current_mileage: Number(mileage),
+				current_fuel_level: Number(fuelLevel),
+				status,
+				created_at: new Date(),
+			},
+		})
+		res.status(201).json({ message: 'New vehicle was successfully added to database.' })
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({ message: 'Server error.' })
+	}
+}
+
 export const deleteVehicle = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params
