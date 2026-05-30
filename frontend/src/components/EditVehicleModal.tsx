@@ -13,14 +13,14 @@ type Props = {
 	licensePlate: string
 	brand: string
 	model: string
-	year: string
+	year: number
 	status: string
 	updateHandler: (
 		id: number,
 		licensePlate: string,
 		brand: string,
 		model: string,
-		year: string,
+		year: number,
 		status: string,
 	) => Promise<void>
 	onUpdate: () => void
@@ -120,7 +120,7 @@ export default function EditVehicleModal({
 											type="text"
 											className="input w-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 											defaultValue={editYear}
-											onChange={e => setEditYear(e.target.value)}
+											onChange={e => setEditYear(Number(e.target.value))}
 										/>
 									</div>
 								</div>
