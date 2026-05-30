@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import EditVehicleModal from './EditVehicleModal'
 
 type Props = {
@@ -5,7 +6,7 @@ type Props = {
 	licensePlate: string
 	brand: string
 	model: string
-	year: string
+	year: number
 	mileage: number
 	status: string
 	removeHandler: (id: number) => void
@@ -14,7 +15,7 @@ type Props = {
 		licensePlate: string,
 		brand: string,
 		model: string,
-		year: string,
+		year: number,
 		status: string,
 	) => Promise<void>
 	onUpdate: () => void
@@ -70,9 +71,9 @@ export default function VehicleRow({
 					<span className="icon-[tabler--trash] size-5"></span>
 				</button>
 
-				<button className="btn btn-circle btn-text btn-sm" aria-label="Show employee logs">
+				<Link to={`/vehicles/${id}`} className="btn btn-circle btn-text btn-sm" aria-label="Show vehicle details">
 					<span className="icon-[tabler--circle-arrow-right] size-5"></span>
-				</button>
+				</Link>
 			</td>
 		</tr>
 	)
