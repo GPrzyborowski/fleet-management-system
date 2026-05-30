@@ -9,6 +9,7 @@ import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Employees from './pages/Employees'
 import Vehicles from './pages/Vehicles'
+import VehicleDetails from './pages/VehicleDetails'
 
 function App() {
 	const location = useLocation()
@@ -43,6 +44,14 @@ function App() {
 						element={
 							<ProtectedRoute>
 								<Vehicles />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/vehicles/:id"
+						element={
+							<ProtectedRoute>
+								<VehicleDetails />
 							</ProtectedRoute>
 						}
 					/>
