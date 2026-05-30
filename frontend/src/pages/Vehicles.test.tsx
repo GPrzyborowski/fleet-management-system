@@ -154,7 +154,7 @@ describe('Vehicles page', () => {
 	})
 
 	it('removes vehicle from list after delete', async () => {
-		globalThis.fetch = vi.fn(async (url: string, options?: RequestInit) => {
+		globalThis.fetch = vi.fn(async (_url: string, options?: RequestInit) => {
 			if (options?.method === 'DELETE') {
 				return { ok: true, json: async () => ({}) } as Response
 			}
