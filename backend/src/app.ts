@@ -3,6 +3,7 @@ import cors from 'cors'
 import prisma from './config/prisma-client'
 import auth from './routes/auth.routes'
 import employees from './routes/employees.routes'
+import vehicles from './routes/vehicles.routes'
 import password from './routes/password.routes'
 
 const app = express()
@@ -41,6 +42,7 @@ app.get('/ready', async (req, res) => {
 
 app.use('/api', auth)
 app.use('/api', employees)
+app.use('/api', vehicles)
 app.use('/api', password)
 
 export default app

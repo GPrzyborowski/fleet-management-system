@@ -7,13 +7,13 @@ describe('ProtectedRoute', () => {
 		localStorage.clear()
 	})
 	it('renders children when token exists', () => {
-		localStorage.setItem('token', 'test token')
+		const validPayload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }))
+		localStorage.setItem('token', `header.${validPayload}.signature`)
+
 		render(
 			<MemoryRouter>
 				<ProtectedRoute>
-					<div>
-						<p>Test protected route</p>
-					</div>
+					<div>Test protected route</div>
 				</ProtectedRoute>
 			</MemoryRouter>,
 		)
