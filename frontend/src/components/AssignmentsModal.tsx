@@ -22,9 +22,10 @@ export type Assignment = {
 type Props = {
 	assignments: Assignment[]
 	vehicleId: string | undefined
+	downloadHandler: (url: string) => void
 }
 
-export default function AssignmentsModal({ assignments }: Props) {
+export default function AssignmentsModal({ assignments, downloadHandler }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 
 	return (
@@ -74,7 +75,7 @@ export default function AssignmentsModal({ assignments }: Props) {
 
 							<tbody>
 								{assignments.map(assignment => (
-									<AssignmentRow key={assignment.id} {...assignment} />
+									<AssignmentRow key={assignment.id} {...assignment} downloadHandler={downloadHandler} />
 								))}
 							</tbody>
 						</table>
