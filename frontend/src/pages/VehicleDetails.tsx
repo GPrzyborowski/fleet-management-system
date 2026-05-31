@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import AssignmentsModal, { type Assignment } from '../components/AssignmentsModal'
@@ -21,10 +21,12 @@ export default function VehicleDetails() {
 	const { id } = useParams()
 	const { state } = useLocation()
 	const [vehicleStatus, setVehicleStatus] = useState(state.status)
-	const vehicle = state ?? null
+
 	let statusFormatted = ''
-	if (vehicleStatus) {
-		vehicleStatus == 'available' ? (statusFormatted = 'In fleet') : (statusFormatted = 'Withdrawn')
+	if (vehicleStatus === 'available') {
+		statusFormatted = 'In fleet'
+	} else if (vehicleStatus) {
+		statusFormatted = 'Withdrawn'
 	}
 
 	const downloadImage = async (imageUrl: string) => {
@@ -40,7 +42,7 @@ export default function VehicleDetails() {
 		URL.revokeObjectURL(link.href)
 	}
 
-	const getAssignments = async () => {
+	const getAssignments = useCallback(async () => {
 		try {
 			const res = await fetch(`${API_URL}/assignments-vehicle/${id}`, {
 				headers: {
@@ -53,7 +55,7 @@ export default function VehicleDetails() {
 		} catch (err) {
 			console.error(err)
 		}
-	}
+	}, [id, token])
 
 	const endAssignment = async () => {
 		try {
@@ -97,7 +99,7 @@ export default function VehicleDetails() {
 
 	useEffect(() => {
 		getAssignments()
-	}, [id, refreshTrigger])
+	}, [getAssignments, refreshTrigger])
 
 	return (
 		<PageTransition>
@@ -120,8 +122,8 @@ export default function VehicleDetails() {
 							</td>
 							<td className="py-5 font-medium text-base-content">Issues</td>
 							<td className="py-5 flex gap-2">
-								{vehicleStatus == 'unavailable' ? (
-									<span className={`badge badge-soft badge-error text-xs`}>Not Applicable - withdrawn</span>
+								{vehicleStatus === 'unavailable' ? (
+									<span className="badge badge-soft badge-error text-xs">Not Applicable - withdrawn</span>
 								) : (
 									<>
 										{' '}
@@ -142,7 +144,7 @@ export default function VehicleDetails() {
 							<td className="py-5 text-base-content/80">{state.licensePlate ?? '-'}</td>
 							<td className="py-5 font-medium text-base-content">Availability</td>
 							<td className="py-5">
-								{vehicleStatus == 'available' ? (
+								{vehicleStatus === 'available' ? (
 									<button className="btn btn-soft btn-sm" onClick={withdrawFromFleet}>
 										<span className="icon-[tabler--arrow-back] size-4"></span>
 										Withdraw from Fleet
@@ -186,7 +188,7 @@ export default function VehicleDetails() {
 							<td></td>
 							<td></td>
 						</tr>
-						{vehicleStatus == 'available' ? (
+						{vehicleStatus === 'available' ? (
 							<tr>
 								<td className="py-5 font-medium text-base-content">Assigned to</td>
 								<td className="py-5 text-base-content/80 flex items-center gap-4">
