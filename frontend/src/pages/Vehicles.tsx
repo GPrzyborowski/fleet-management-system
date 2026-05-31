@@ -12,6 +12,7 @@ type Vehicle = {
 	model: string
 	year_of_manufacture: number
 	current_mileage: number
+	current_fuel_level: number
 	status: string
 }
 
@@ -141,6 +142,7 @@ export default function Vehicles() {
 											model={vehicle.model}
 											year={vehicle.year_of_manufacture}
 											mileage={vehicle.current_mileage}
+											fuelLevel={vehicle.current_fuel_level}
 											status={vehicle.status}
 											removeHandler={removeVehicle}
 											updateHandler={updateVehicle}
