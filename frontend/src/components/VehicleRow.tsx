@@ -71,7 +71,11 @@ export default function VehicleRow({
 					<span className="icon-[tabler--trash] size-5"></span>
 				</button>
 
-				<Link to={`/vehicles/${id}`} className="btn btn-circle btn-text btn-sm" aria-label="Show vehicle details">
+				<Link
+					to={`/vehicles/${id}`}
+					state={{ id, licensePlate, brand, model, year, mileage, status }}
+					className="btn btn-circle btn-text btn-sm"
+					aria-label="Show vehicle details">
 					<span className="icon-[tabler--circle-arrow-right] size-5"></span>
 				</Link>
 			</td>
