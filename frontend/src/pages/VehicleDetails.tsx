@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import AssignmentsModal, { type Assignment } from '../components/AssignmentsModal'
@@ -42,21 +42,6 @@ export default function VehicleDetails() {
 		URL.revokeObjectURL(link.href)
 	}
 
-	const getAssignments = useCallback(async () => {
-		try {
-			const res = await fetch(`${API_URL}/assignments-vehicle/${id}`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			})
-			const data = await res.json()
-			setAssignments(res.ok ? data.assignments : [])
-			setAssigned(res.ok ? data.assigned : null)
-		} catch (err) {
-			console.error(err)
-		}
-	}, [id, token])
-
 	const endAssignment = async () => {
 		try {
 			await fetch(`${API_URL}/assignments-end/${id}`, {
@@ -98,8 +83,23 @@ export default function VehicleDetails() {
 	}
 
 	useEffect(() => {
-		getAssignments()
-	}, [getAssignments, refreshTrigger])
+		const fetchAssignments = async () => {
+			try {
+				const res = await fetch(`${API_URL}/assignments-vehicle/${id}`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				})
+				const data = await res.json()
+				setAssignments(res.ok ? data.assignments : [])
+				setAssigned(res.ok ? data.assigned : null)
+			} catch (err) {
+				console.error(err)
+			}
+		}
+
+		fetchAssignments()
+	}, [id, token, refreshTrigger])
 
 	return (
 		<PageTransition>
