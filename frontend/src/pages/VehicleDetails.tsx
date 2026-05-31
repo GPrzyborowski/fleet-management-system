@@ -5,12 +5,38 @@ import AssignmentsModal, { type Assignment } from '../components/AssignmentsModa
 import PageTransition from '../components/PageTransition'
 import { API_URL } from '../config/api'
 
+type AssignedDriver = {
+	id: number
+	users: {
+		first_name: string
+		last_name: string
+	}
+} | null
+
 export default function VehicleDetails() {
 	const token = localStorage.getItem('token')
 	const [assignments, setAssignments] = useState<Assignment[]>([])
+	const [assigned, setAssigned] = useState<AssignedDriver>(null)
 	const { id } = useParams()
 	const { state } = useLocation()
 	const vehicle = state ?? null
+	let statusFormatted = ''
+	if (state.status) {
+		state.status == 'available' ? (statusFormatted = 'In fleet') : (statusFormatted = 'Withdrawn')
+	}
+
+	const downloadImage = async (imageUrl: string) => {
+		const res = await fetch(`${API_URL}/download?url=${encodeURIComponent(imageUrl)}`, {
+			headers: { Authorization: `Bearer ${token}` },
+		})
+		const blob = await res.blob()
+		const filename = imageUrl.split('/').pop() ?? 'image'
+		const link = document.createElement('a')
+		link.href = URL.createObjectURL(blob)
+		link.download = filename
+		link.click()
+		URL.revokeObjectURL(link.href)
+	}
 
 	const getAssignments = async () => {
 		try {
@@ -20,7 +46,8 @@ export default function VehicleDetails() {
 				},
 			})
 			const data = await res.json()
-			setAssignments(res.ok ? data : [])
+			setAssignments(res.ok ? data.assignments : [])
+			setAssigned(res.ok ? data.assigned : null)
 		} catch (err) {
 			console.error(err)
 		}
@@ -102,25 +129,27 @@ export default function VehicleDetails() {
 							<td className="py-5 text-base-content/80">{state.mileage ?? '-'}</td>
 							<td className="py-5 font-medium text-base-content">Assignment Log</td>
 							<td className="py-5">
-								<AssignmentsModal assignments={assignments} vehicleId={id} />
+								<AssignmentsModal assignments={assignments} vehicleId={id} downloadHandler={downloadImage} />
 							</td>
 						</tr>
 						<tr>
 							<td className="py-5 font-medium text-base-content">Fuel level</td>
-							<td className="py-5 text-base-content/80">{state.fuelLevel ?? '-'}</td>
+							<td className="py-5 text-base-content/80">{state.fuelLevel ? `${state.fuelLevel}%` : `-`}</td>
 							<td></td>
 							<td></td>
 						</tr>
 						<tr>
 							<td className="py-5 font-medium text-base-content">Status</td>
-							<td className="py-5 text-base-content/80 capitalize">{state.status ?? '-'}</td>
+							<td className="py-5 text-base-content/80 capitalize">{statusFormatted || '-'}</td>
 							<td></td>
 							<td></td>
 						</tr>
 						{state.status == 'available' ? (
 							<tr>
 								<td className="py-5 font-medium text-base-content">Assigned to</td>
-								<td className="py-5 text-base-content/80">Not assigned</td>
+								<td className="py-5 text-base-content/80">
+									{assigned ? `${assigned.users.first_name} ${assigned.users.last_name}` : 'Not assigned'}
+								</td>
 								<td></td>
 								<td></td>
 							</tr>
