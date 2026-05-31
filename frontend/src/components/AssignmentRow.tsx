@@ -50,10 +50,10 @@ export default function AssignmentRow({
 			</td>
 			<td className="py-3 text-base-content/80">{formatDate(start_time)}</td>
 			<td className="py-3 text-base-content/80">{formatDate(end_time)}</td>
-			<td className="py-3 text-base-content/80">{start_mileage}</td>
-			<td className="py-3 text-base-content/80">{end_mileage}</td>
-			<td className="py-3 text-base-content/80">{start_fuel_level}</td>
-			<td className="py-3 text-base-content/80">{end_fuel_level}</td>
+			<td className="py-3 text-base-content/80">{start_mileage} km</td>
+			<td className="py-3 text-base-content/80">{end_mileage ? `${end_mileage} km` : '-'}</td>
+			<td className="py-3 text-base-content/80">{start_fuel_level}%</td>
+			<td className="py-3 text-base-content/80">{end_fuel_level ? `${end_fuel_level}%` : '-'}</td>
 			<td className="py-3 text-base-content/80">
 				{dashboard_image_url ? (
 					<button onClick={() => downloadHandler(dashboard_image_url)} className="btn btn-soft btn-sm">
