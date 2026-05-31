@@ -77,7 +77,7 @@ export const updateVehicle = async (req: Request, res: Response) => {
 	const { licensePlate, brand, model, year, status } = req.body
 	try {
 		await prisma.vehicles.update({
-			where: { id: id },
+			where: { id },
 			data: {
 				license_plate: licensePlate,
 				brand,
@@ -87,6 +87,50 @@ export const updateVehicle = async (req: Request, res: Response) => {
 			},
 		})
 		res.status(200).json({ message: 'Vehicle updated successfully.' })
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({ message: 'Server error.' })
+	}
+}
+
+export const returnToFleet = async (req: Request, res: Response) => {
+	const id = Number(req.params.id)
+	if (!id || isNaN(id)) {
+		res.status(400).json({ message: 'Invalid data.' })
+		return
+	}
+	try {
+		await prisma.vehicles.update({
+			where: {
+				id,
+			},
+			data: {
+				status: 'available',
+			},
+		})
+		res.status(200).json({ message: 'Vehicle returned to fleet.' })
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({ message: 'Server error.' })
+	}
+}
+
+export const withdrawFromFleet = async (req: Request, res: Response) => {
+	const id = Number(req.params.id)
+	if (!id || isNaN(id)) {
+		res.status(400).json({ message: 'Invalid data.' })
+		return
+	}
+	try {
+		await prisma.vehicles.update({
+			where: {
+				id,
+			},
+			data: {
+				status: 'in_service',
+			},
+		})
+		res.status(200).json({ message: 'Vehicle withdrawed from fleet.' })
 	} catch (err) {
 		console.error(err)
 		res.status(500).json({ message: 'Server error.' })
