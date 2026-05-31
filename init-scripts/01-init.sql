@@ -82,11 +82,11 @@ INSERT INTO vehicles (license_plate, brand, model, year_of_manufacture, current_
 ('GD 22222', 'MAN', 'TGX', 2018, 310000, 45, 'in_service'),
 ('GD 33333', 'DAF', 'XF', 2022, 50000, 90, 'available');
 
-INSERT INTO vehicle_assignments (vehicle_id, driver_id, start_time, end_time, start_mileage, end_mileage, start_fuel_level, end_fuel_level, status) VALUES
-(1, 2, '2025-01-10 08:00:00', '2025-01-10 16:00:00', 149000, 150000, 90, 80, 'completed'),
-(2, 3, '2025-02-15 07:00:00', '2025-02-15 15:00:00', 229000, 230000, 70, 60, 'completed'),
-(3, 4, '2025-03-20 06:00:00', NULL, 89500, NULL, 100, NULL, 'active'),
-(1, 5, '2025-04-01 09:00:00', '2025-04-01 17:00:00', 148000, 149000, 95, 90, 'completed');
+INSERT INTO vehicle_assignments (vehicle_id, driver_id, start_time, end_time, start_mileage, end_mileage, start_fuel_level, end_fuel_level, dashboard_image_url, status) VALUES
+(1, 2, '2025-01-10 08:00:00', '2025-01-10 16:00:00', 149000, 150000, 90, 80, 'https://www.racv.com.au/royalauto/transport/cars/what-do-the-car-dashboard-symbols-mean-and-warning-lights/_jcr_content/root/container/articlepagecontent/image.coreimg.jpeg/1745367448392/1400x600-car-dashboard-lights-gettyimages-519216518.jpeg', 'completed'),
+(2, 3, '2025-02-15 07:00:00', '2025-02-15 15:00:00', 229000, 230000, 70, 60, '', 'completed'),
+(3, 4, '2025-03-20 06:00:00', NULL, 89500, NULL, 100, NULL, '', 'active'),
+(1, 5, '2025-04-01 09:00:00', '2025-04-01 17:00:00', 148000, 149000, 95, 90, '', 'completed');
 
 INSERT INTO service_intervals (vehicle_id, element_name, interval_km, interval_months, last_service_mileage, last_service_date) VALUES
 (1, 'Oil change', 15000, 12, 140000, '2024-06-01'),
