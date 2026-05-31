@@ -8,6 +8,7 @@ type Props = {
 	model: string
 	year: number
 	mileage: number
+	fuelLevel: number
 	status: string
 	removeHandler: (id: number) => void
 	updateHandler: (
@@ -28,6 +29,7 @@ export default function VehicleRow({
 	model,
 	year,
 	mileage,
+	fuelLevel,
 	status,
 	removeHandler,
 	updateHandler,
@@ -73,7 +75,7 @@ export default function VehicleRow({
 
 				<Link
 					to={`/vehicles/${id}`}
-					state={{ id, licensePlate, brand, model, year, mileage, status }}
+					state={{ id, licensePlate, brand, model, year, mileage, fuelLevel, status }}
 					className="btn btn-circle btn-text btn-sm"
 					aria-label="Show vehicle details">
 					<span className="icon-[tabler--circle-arrow-right] size-5"></span>
