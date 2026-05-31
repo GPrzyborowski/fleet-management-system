@@ -1,7 +1,4 @@
 type Props = {
-	id: number
-	vehicle_id: number
-	driver_id: number
 	start_time: string
 	end_time: string | null
 	start_mileage: number
@@ -18,9 +15,6 @@ type Props = {
 }
 
 export default function AssignmentRow({
-	id,
-	vehicle_id,
-	driver_id,
 	start_time,
 	end_time,
 	start_mileage,
