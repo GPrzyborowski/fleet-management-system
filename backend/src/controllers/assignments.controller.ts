@@ -14,8 +14,20 @@ export const getAssignmentsForVehicle = async (req: Request, res: Response) => {
 					},
 				},
 			},
+			orderBy: { start_time: 'desc' },
 		})
-		return res.status(200).json(assignments)
+		const assigned = await prisma.vehicle_assignments.findFirst({
+			where: { vehicle_id: id, end_time: { equals: null } },
+			include: {
+				users: {
+					select: {
+						first_name: true,
+						last_name: true,
+					},
+				},
+			},
+		})
+		return res.status(200).json({ assignments, assigned })
 	} catch (err) {
 		console.error(err)
 		return res.status(500).json({ error: 'Server error.' })
