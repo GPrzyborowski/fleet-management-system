@@ -14,6 +14,7 @@ type Props = {
 		first_name: string
 		last_name: string
 	}
+	downloadHandler: (url: string) => void
 }
 
 export default function AssignmentRow({
@@ -29,6 +30,7 @@ export default function AssignmentRow({
 	dashboard_image_url,
 	status,
 	users: { first_name, last_name },
+	downloadHandler,
 }: Props) {
 	const formatDate = (date: string | null) => {
 		if (!date) return '-'
@@ -52,8 +54,17 @@ export default function AssignmentRow({
 			<td className="py-3 text-base-content/80">{end_mileage}</td>
 			<td className="py-3 text-base-content/80">{start_fuel_level}</td>
 			<td className="py-3 text-base-content/80">{end_fuel_level}</td>
-			<td className="py-3 text-base-content/80">{dashboard_image_url || '-'}</td>
-			<td className="py-3 text-base-content/80">{status}</td>
+			<td className="py-3 text-base-content/80">
+				{dashboard_image_url ? (
+					<button onClick={() => downloadHandler(dashboard_image_url)} className="btn btn-soft btn-sm">
+						<span className="icon-[tabler--download] size-4"></span>
+						Download
+					</button>
+				) : (
+					'Not available'
+				)}
+			</td>
+			<td className="py-3 text-base-content/80 capitalize">{status}</td>
 		</tr>
 	)
 }
