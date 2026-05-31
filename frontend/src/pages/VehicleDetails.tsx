@@ -17,12 +17,14 @@ export default function VehicleDetails() {
 	const token = localStorage.getItem('token')
 	const [assignments, setAssignments] = useState<Assignment[]>([])
 	const [assigned, setAssigned] = useState<AssignedDriver>(null)
+	const [refreshTrigger, setRefreshTrigger] = useState(0)
 	const { id } = useParams()
 	const { state } = useLocation()
+	const [vehicleStatus, setVehicleStatus] = useState(state.status)
 	const vehicle = state ?? null
 	let statusFormatted = ''
-	if (state.status) {
-		state.status == 'available' ? (statusFormatted = 'In fleet') : (statusFormatted = 'Withdrawn')
+	if (vehicleStatus) {
+		vehicleStatus == 'available' ? (statusFormatted = 'In fleet') : (statusFormatted = 'Withdrawn')
 	}
 
 	const downloadImage = async (imageUrl: string) => {
@@ -53,9 +55,49 @@ export default function VehicleDetails() {
 		}
 	}
 
+	const endAssignment = async () => {
+		try {
+			await fetch(`${API_URL}/assignments-end/${id}`, {
+				method: 'PATCH',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+			setRefreshTrigger(prev => prev + 1)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	const returnToFleet = async () => {
+		try {
+			await fetch(`${API_URL}/vehicles/${id}/return`, {
+				method: 'PATCH',
+				headers: { Authorization: `Bearer ${token}` },
+			})
+			setVehicleStatus('available')
+			setRefreshTrigger(prev => prev + 1)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	const withdrawFromFleet = async () => {
+		try {
+			await fetch(`${API_URL}/vehicles/${id}/withdraw`, {
+				method: 'PATCH',
+				headers: { Authorization: `Bearer ${token}` },
+			})
+			setVehicleStatus('in_service')
+			setRefreshTrigger(prev => prev + 1)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
 	useEffect(() => {
 		getAssignments()
-	}, [id])
+	}, [id, refreshTrigger])
 
 	return (
 		<PageTransition>
@@ -78,7 +120,7 @@ export default function VehicleDetails() {
 							</td>
 							<td className="py-5 font-medium text-base-content">Issues</td>
 							<td className="py-5 flex gap-2">
-								{state.status == 'unavailable' ? (
+								{vehicleStatus == 'unavailable' ? (
 									<span className={`badge badge-soft badge-error text-xs`}>Not Applicable - withdrawn</span>
 								) : (
 									<>
@@ -100,13 +142,13 @@ export default function VehicleDetails() {
 							<td className="py-5 text-base-content/80">{state.licensePlate ?? '-'}</td>
 							<td className="py-5 font-medium text-base-content">Availability</td>
 							<td className="py-5">
-								{state.status == 'available' ? (
-									<button className="btn btn-soft btn-sm">
+								{vehicleStatus == 'available' ? (
+									<button className="btn btn-soft btn-sm" onClick={withdrawFromFleet}>
 										<span className="icon-[tabler--arrow-back] size-4"></span>
 										Withdraw from Fleet
 									</button>
 								) : (
-									<button className="btn btn-soft btn-sm">
+									<button className="btn btn-soft btn-sm" onClick={returnToFleet}>
 										<span className="icon-[tabler--arrow-back] size-4"></span>
 										Return to Fleet
 									</button>
@@ -126,7 +168,7 @@ export default function VehicleDetails() {
 						</tr>
 						<tr>
 							<td className="py-5 font-medium text-base-content">Mileage</td>
-							<td className="py-5 text-base-content/80">{state.mileage ?? '-'}</td>
+							<td className="py-5 text-base-content/80">{state.mileage ? `${state.mileage} km` : `-`}</td>
 							<td className="py-5 font-medium text-base-content">Assignment Log</td>
 							<td className="py-5">
 								<AssignmentsModal assignments={assignments} vehicleId={id} downloadHandler={downloadImage} />
@@ -144,11 +186,17 @@ export default function VehicleDetails() {
 							<td></td>
 							<td></td>
 						</tr>
-						{state.status == 'available' ? (
+						{vehicleStatus == 'available' ? (
 							<tr>
 								<td className="py-5 font-medium text-base-content">Assigned to</td>
-								<td className="py-5 text-base-content/80">
+								<td className="py-5 text-base-content/80 flex items-center gap-4">
 									{assigned ? `${assigned.users.first_name} ${assigned.users.last_name}` : 'Not assigned'}
+									{assigned && (
+										<button className="btn btn-soft btn-error btn-sm" onClick={endAssignment}>
+											<span className="icon-[tabler--user-minus] size-4"></span>
+											End
+										</button>
+									)}
 								</td>
 								<td></td>
 								<td></td>
