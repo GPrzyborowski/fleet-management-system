@@ -6,6 +6,7 @@ import employees from './routes/employees.routes'
 import vehicles from './routes/vehicles.routes'
 import assignments from './routes/assignments.routes'
 import password from './routes/password.routes'
+import media from './routes/media.routes'
 
 const app = express()
 
@@ -46,5 +47,6 @@ app.use('/api', employees)
 app.use('/api', vehicles)
 app.use('/api', assignments)
 app.use('/api', password)
+app.use('/api', media)
 
 export default app
