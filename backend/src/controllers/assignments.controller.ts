@@ -57,3 +57,29 @@ export const endAssignment = async (req: Request, res: Response) => {
 		return res.status(500).json({ error: 'Server error.' })
 	}
 }
+
+export const getActiveAssignmentsForEmployee = async (req: Request, res: Response) => {
+	const id = req.user!.id
+	try {
+		const activeAssignments = await prisma.vehicle_assignments.findMany({
+			where: {
+				driver_id: id,
+				end_time: null,
+			},
+			include: {
+				vehicles: {
+					select: {
+						license_plate: true,
+						brand: true,
+						model: true,
+					},
+				},
+			},
+			orderBy: { start_time: 'desc' },
+		})
+		return res.status(200).json(activeAssignments)
+	} catch (err) {
+		console.error(err)
+		return res.status(500).json({ error: 'Server error.' })
+	}
+}
