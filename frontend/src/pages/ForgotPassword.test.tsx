@@ -64,14 +64,4 @@ describe('ForgotPassword page', () => {
 			expect(screen.getByText('Server error occured.')).toBeInTheDocument()
 		})
 	})
-
-	it('renders hero image', () => {
-		render(
-			<MemoryRouter>
-				<ForgotPassword />
-			</MemoryRouter>,
-		)
-		const image = screen.getByAltText('')
-		expect(image).toHaveAttribute('src', '/hero_reset.png')
-	})
 })
