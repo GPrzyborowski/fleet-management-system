@@ -34,7 +34,6 @@ export default function ForgotPassword() {
 		<PageTransition>
 			<Header text="Forgot password" />
 			<EmailForm submitEmail={submitEmail} successMsg={successMsg} errorMsg={errorMsg} pending={pending} />
-			<img className="mt-10 mx-auto md:max-w-1/3 h-auto px-4" src="/hero_reset.png" alt="" />
 		</PageTransition>
 	)
 }
