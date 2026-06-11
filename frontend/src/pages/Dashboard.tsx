@@ -4,6 +4,7 @@ import PageTransition from '../components/PageTransition'
 import Header from '../components/Header'
 import ActionCard from '../components/ActionCard'
 import ActiveAssignmentsTable from '../components/ActiveAssignmentsTable'
+import ReturnModal from '../components/ReturnModal'
 import { API_URL } from '../config/api'
 
 interface TokenPayload {
@@ -38,9 +39,7 @@ export default function Dashboard() {
 	const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([])
 	const token = localStorage.getItem('token')
 	const decoded = useMemo(() => {
-		if (!token) {
-			return
-		}
+		if (!token) return
 		try {
 			return jwtDecode<TokenPayload>(token)
 		} catch (err) {
@@ -52,24 +51,26 @@ export default function Dashboard() {
 	const login = decoded?.login ?? ''
 	const role = decoded?.role ?? ''
 
-	const getActiveAssignments = useCallback(async () => {
-		try {
-			const res = await fetch(`${API_URL}/assignments`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
+	const getActiveAssignments = useCallback(
+		(signal: AbortSignal) => {
+			fetch(`${API_URL}/assignments`, {
+				headers: { Authorization: `Bearer ${token}` },
+				signal,
 			})
-			const data = await res.json()
-			setActiveAssignments(res.ok ? data : [])
-		} catch (err) {
-			console.error(err)
-		}
-	}, [token])
+				.then(res => res.json().then((data: Assignment[]) => ({ ok: res.ok, data })))
+				.then(({ ok, data }) => setActiveAssignments(ok ? data : []))
+				.catch(err => {
+					if ((err as Error).name !== 'AbortError') console.error(err)
+				})
+		},
+		[token],
+	)
 
 	useEffect(() => {
-		if (role == 'driver') {
-			getActiveAssignments()
-		}
+		if (role !== 'driver') return
+		const controller = new AbortController()
+		getActiveAssignments(controller.signal)
+		return () => controller.abort()
 	}, [role, getActiveAssignments])
 
 	return (
@@ -94,6 +95,12 @@ export default function Dashboard() {
 			{role == 'driver' && (
 				<>
 					<ActiveAssignmentsTable activeAssignments={activeAssignments} />
+					<ReturnModal
+						licensePlate="GD 12345"
+						onReturn={data => {
+							console.log(data)
+						}}
+					/>
 				</>
 			)}
 		</PageTransition>
