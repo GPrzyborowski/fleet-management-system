@@ -6,7 +6,7 @@ type Props = {
 	startDate: string
 }
 
-export default function ActiveAssignmentsRow({ id, licensePlate, brand, model, startDate }: Props) {
+export default function ActiveAssignmentsRow({ licensePlate, brand, model, startDate }: Props) {
 	const formatDate = (date: string | null) => {
 		if (!date) return '-'
 		return new Date(date).toLocaleString('pl-PL', {
