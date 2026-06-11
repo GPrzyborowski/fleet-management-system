@@ -1,8 +1,11 @@
-import { useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { jwtDecode } from 'jwt-decode'
 import PageTransition from '../components/PageTransition'
 import Header from '../components/Header'
 import ActionCard from '../components/ActionCard'
+import ActiveAssignmentsTable from '../components/ActiveAssignmentsTable'
+import ReturnModal from '../components/ReturnModal'
+import { API_URL } from '../config/api'
 
 interface TokenPayload {
 	id: number
@@ -11,12 +14,32 @@ interface TokenPayload {
 	exp: number
 }
 
+interface Vehicle {
+	brand: string
+	license_plate: string
+	model: string
+}
+
+interface Assignment {
+	dashboard_image_url: string
+	driver_id: number
+	end_fuel_level: number | null
+	end_mileage: number | null
+	end_time: string | null
+	id: number
+	start_fuel_level: number
+	start_mileage: number
+	start_time: string
+	status: string
+	vehicle_id: number
+	vehicles: Vehicle
+}
+
 export default function Dashboard() {
+	const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([])
 	const token = localStorage.getItem('token')
 	const decoded = useMemo(() => {
-		if (!token) {
-			return
-		}
+		if (!token) return
 		try {
 			return jwtDecode<TokenPayload>(token)
 		} catch (err) {
@@ -27,6 +50,28 @@ export default function Dashboard() {
 
 	const login = decoded?.login ?? ''
 	const role = decoded?.role ?? ''
+
+	const getActiveAssignments = useCallback(
+		(signal: AbortSignal) => {
+			fetch(`${API_URL}/assignments`, {
+				headers: { Authorization: `Bearer ${token}` },
+				signal,
+			})
+				.then(res => res.json().then((data: Assignment[]) => ({ ok: res.ok, data })))
+				.then(({ ok, data }) => setActiveAssignments(ok ? data : []))
+				.catch(err => {
+					if ((err as Error).name !== 'AbortError') console.error(err)
+				})
+		},
+		[token],
+	)
+
+	useEffect(() => {
+		if (role !== 'driver') return
+		const controller = new AbortController()
+		getActiveAssignments(controller.signal)
+		return () => controller.abort()
+	}, [role, getActiveAssignments])
 
 	return (
 		<PageTransition>
@@ -46,6 +91,17 @@ export default function Dashboard() {
 						links="vehicles"
 					/>
 				</div>
+			)}
+			{role == 'driver' && (
+				<>
+					<ActiveAssignmentsTable activeAssignments={activeAssignments} />
+					<ReturnModal
+						licensePlate="GD 12345"
+						onReturn={data => {
+							console.log(data)
+						}}
+					/>
+				</>
 			)}
 		</PageTransition>
 	)
