@@ -1,12 +1,16 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 import ReturnModal from './ReturnModal'
 
+const mockSocketOn = vi.fn()
+const mockSocketEmit = vi.fn()
+const mockSocketDisconnect = vi.fn()
+
 vi.mock('socket.io-client', () => ({
 	io: () => ({
-		on: vi.fn(),
-		emit: vi.fn(),
-		disconnect: vi.fn(),
+		on: mockSocketOn,
+		emit: mockSocketEmit,
+		disconnect: mockSocketDisconnect,
 		id: 'test-socket-id',
 	}),
 }))
@@ -22,6 +26,28 @@ const defaultProps = {
 	licensePlate: 'GD 12345',
 	assignmentId: 1,
 	onReturn: mockOnReturn,
+}
+
+const getDashboardFileInput = (container: HTMLElement) =>
+	container.querySelector('input[type="file"]') as HTMLInputElement
+
+const uploadDashboardAndWaitForOcr = async (container: HTMLElement) => {
+	fireEvent.change(getDashboardFileInput(container), {
+		target: { files: [new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })] },
+	})
+
+	await waitFor(() => {
+		expect(globalThis.fetch).toHaveBeenCalled()
+	})
+
+	const ocrCallback = mockSocketOn.mock.calls.find(call => call[0] === 'dashboard-ocr-result')?.[1]
+	if (ocrCallback) {
+		ocrCallback({ mileage: 150000, fuelLevel: 80 })
+	}
+
+	await waitFor(() => {
+		expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
+	})
 }
 
 describe('ReturnModal', () => {
@@ -105,32 +131,18 @@ describe('ReturnModal', () => {
 		expect(container.querySelector('.fixed.inset-0.z-50')).toHaveClass('opacity-0', 'invisible')
 	})
 
-	it('advances to step 2 on Next click when dashboard image provided', () => {
-		render(<ReturnModal {...defaultProps} />)
+	it('advances to step 2 on Next click when dashboard image provided', async () => {
+		const { container } = render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-
-		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
-		const fileInput = screen
-			.getAllByRole('button', { name: /choose file/i })[0]
-			.closest('label')!
-			.querySelector('input[type="file"]')!
-		fireEvent.change(fileInput, { target: { files: [file] } })
-
+		await uploadDashboardAndWaitForOcr(container)
 		expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
 	})
 
-	it('renders step 2 fields after advancing', () => {
-		render(<ReturnModal {...defaultProps} />)
+	it('renders step 2 fields after advancing', async () => {
+		const { container } = render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-
-		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
-		const fileInput = screen
-			.getAllByRole('button', { name: /choose file/i })[0]
-			.closest('label')!
-			.querySelector('input[type="file"]')!
-		fireEvent.change(fileInput, { target: { files: [file] } })
+		await uploadDashboardAndWaitForOcr(container)
 		fireEvent.click(screen.getByRole('button', { name: /next/i }))
-
 		expect(screen.getByText('Step 2 of 2')).toBeInTheDocument()
 		expect(screen.getByText('Front picture')).toBeInTheDocument()
 		expect(screen.getByText('Left picture')).toBeInTheDocument()
@@ -138,49 +150,30 @@ describe('ReturnModal', () => {
 		expect(screen.getByText('Back picture')).toBeInTheDocument()
 	})
 
-	it('renders Back button on step 2', () => {
-		render(<ReturnModal {...defaultProps} />)
+	it('renders Back button on step 2', async () => {
+		const { container } = render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-
-		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
-		const fileInput = screen
-			.getAllByRole('button', { name: /choose file/i })[0]
-			.closest('label')!
-			.querySelector('input[type="file"]')!
-		fireEvent.change(fileInput, { target: { files: [file] } })
+		await uploadDashboardAndWaitForOcr(container)
 		fireEvent.click(screen.getByRole('button', { name: /next/i }))
-
 		expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument()
 	})
 
-	it('renders Return vehicle button on step 2', () => {
-		render(<ReturnModal {...defaultProps} />)
+	it('renders Return vehicle button on step 2', async () => {
+		const { container } = render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-
-		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
-		const fileInput = screen
-			.getAllByRole('button', { name: /choose file/i })[0]
-			.closest('label')!
-			.querySelector('input[type="file"]')!
-		fireEvent.change(fileInput, { target: { files: [file] } })
+		await uploadDashboardAndWaitForOcr(container)
 		fireEvent.click(screen.getByRole('button', { name: /next/i }))
-
-		expect(screen.getByRole('button', { name: /return/i })).toBeInTheDocument()
+		expect(screen.getByText('Step 2 of 2')).toBeInTheDocument()
+		const buttons = screen.getAllByRole('button', { name: /^return$/i })
+		expect(buttons).toHaveLength(2)
 	})
 
-	it('goes back to step 1 on Back button click', () => {
-		render(<ReturnModal {...defaultProps} />)
+	it('goes back to step 1 on Back button click', async () => {
+		const { container } = render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-
-		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
-		const fileInput = screen
-			.getAllByRole('button', { name: /choose file/i })[0]
-			.closest('label')!
-			.querySelector('input[type="file"]')!
-		fireEvent.change(fileInput, { target: { files: [file] } })
+		await uploadDashboardAndWaitForOcr(container)
 		fireEvent.click(screen.getByRole('button', { name: /next/i }))
 		fireEvent.click(screen.getByRole('button', { name: /back/i }))
-
 		expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
 	})
 

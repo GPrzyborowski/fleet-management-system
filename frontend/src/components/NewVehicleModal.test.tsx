@@ -44,7 +44,7 @@ describe('NewVehicleModal', () => {
 		expect(screen.getByRole('option', { name: 'Not available' })).toBeInTheDocument()
 	})
 
-	it('calls addHandler and onUpdate on form submit', async () => {
+	it('calls addHandler with FormData and calls onUpdate on form submit', async () => {
 		mockAddHandler.mockResolvedValue(undefined)
 		render(<NewVehicleModal {...defaultProps} />)
 
@@ -59,7 +59,7 @@ describe('NewVehicleModal', () => {
 		fireEvent.click(screen.getByRole('button', { name: /add vehicle/i }))
 
 		await waitFor(() => {
-			expect(mockAddHandler).toHaveBeenCalledWith('GD 12345', 'Volvo', 'FH16', 2020, 150000, 80, 'available')
+			expect(mockAddHandler).toHaveBeenCalledWith(expect.any(FormData))
 			expect(mockOnUpdate).toHaveBeenCalled()
 		})
 	})
@@ -68,5 +68,19 @@ describe('NewVehicleModal', () => {
 		render(<NewVehicleModal {...defaultProps} />)
 		expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
 		expect(screen.getByRole('button', { name: /add vehicle/i })).toBeInTheDocument()
+	})
+
+	it('renders base reference photos section', () => {
+		render(<NewVehicleModal {...defaultProps} />)
+		expect(screen.getByText('Base reference photos')).toBeInTheDocument()
+		expect(screen.getByText('Front')).toBeInTheDocument()
+		expect(screen.getByText('Left')).toBeInTheDocument()
+		expect(screen.getByText('Right')).toBeInTheDocument()
+		expect(screen.getByText('Back')).toBeInTheDocument()
+	})
+
+	it('renders four file inputs for base photos', () => {
+		const { container } = render(<NewVehicleModal {...defaultProps} />)
+		expect(container.querySelectorAll('input[type="file"]')).toHaveLength(4)
 	})
 })
