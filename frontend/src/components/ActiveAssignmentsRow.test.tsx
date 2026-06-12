@@ -1,5 +1,14 @@
 import { render, screen } from '@testing-library/react'
+import { vi } from 'vitest'
 import ActiveAssignmentsRow from './ActiveAssignmentsRow'
+
+vi.mock('./ReturnModal', () => ({
+	default: ({ licensePlate, assignmentId }: { licensePlate: string; assignmentId: number; onReturn: () => void }) => (
+		<button data-testid={`return-modal-${assignmentId}`}>{licensePlate} Return</button>
+	),
+}))
+
+const mockOnReturn = vi.fn()
 
 const defaultProps = {
 	id: 1,
@@ -7,6 +16,7 @@ const defaultProps = {
 	brand: 'Volvo',
 	model: 'FH16',
 	startDate: '2024-01-01T08:00:00',
+	onReturn: mockOnReturn,
 }
 
 const renderRow = (props = {}) =>
@@ -19,6 +29,10 @@ const renderRow = (props = {}) =>
 	)
 
 describe('ActiveAssignmentsRow', () => {
+	beforeEach(() => {
+		vi.clearAllMocks()
+	})
+
 	it('renders license plate', () => {
 		renderRow()
 		expect(screen.getByText('GD 12345')).toBeInTheDocument()
@@ -39,9 +53,9 @@ describe('ActiveAssignmentsRow', () => {
 		expect(screen.getByText('-')).toBeInTheDocument()
 	})
 
-	it('renders Return button', () => {
+	it('renders ReturnModal with correct assignmentId', () => {
 		renderRow()
-		expect(screen.getByRole('button', { name: /return/i })).toBeInTheDocument()
+		expect(screen.getByTestId('return-modal-1')).toBeInTheDocument()
 	})
 
 	it('renders different license plate', () => {
@@ -57,5 +71,10 @@ describe('ActiveAssignmentsRow', () => {
 	it('renders correct date format for different date', () => {
 		renderRow({ startDate: '2025-12-31T23:59:00' })
 		expect(screen.getByText('31.12.2025, 23:59')).toBeInTheDocument()
+	})
+
+	it('renders four table cells', () => {
+		const { container } = renderRow()
+		expect(container.querySelectorAll('td')).toHaveLength(4)
 	})
 })
