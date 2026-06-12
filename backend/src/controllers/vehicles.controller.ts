@@ -14,6 +14,25 @@ export const getVehicles = async (req: Request, res: Response) => {
 	}
 }
 
+export const getAllVehicleIncidents = async (req: Request, res: Response) => {
+	const vehicleId = Number(req.params.id)
+	if (!vehicleId || isNaN(vehicleId)) {
+		res.status(400).json({ message: 'Invalid data.' })
+		return
+	}
+	try {
+		const incidents = await prisma.vehicle_incidents.findMany({
+			where: { vehicle_id: vehicleId },
+			include: { vehicle_incident_images: true },
+			orderBy: { created_at: 'desc' },
+		})
+		res.json(incidents)
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({ error: 'Server error.' })
+	}
+}
+
 export const addVehicle = async (req: Request, res: Response) => {
 	const { licensePlate, brand, model, year, mileage, fuelLevel, status } = req.body
 	const files = req.files as Record<string, Express.Multer.File[]>
