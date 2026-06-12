@@ -243,9 +243,9 @@ export default function ReturnModal({ licensePlate, assignmentId, onReturn }: Pr
 								</div>
 							</div>
 							<p className="text-xs text-base-content/50">
-								If the information was read correctly, press <strong>Next</strong>. Otherwise, enter correct data
-								manually above.
+								If the information was read correctly, press <strong>Next</strong>.
 							</p>
+							<p className='text-xs text-base-content/50'>Otherwise, enter correct data manually above.</p>
 						</div>
 					)}
 
