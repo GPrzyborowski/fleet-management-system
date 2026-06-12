@@ -13,6 +13,20 @@ type AssignedDriver = {
 	}
 } | null
 
+type IncidentImage = {
+	id: number
+	side: string
+	azure_blob_url: string
+	image_type: string
+}
+
+type Incident = {
+	id: number
+	ai_description: string
+	created_at: string
+	vehicle_incident_images: IncidentImage[]
+}
+
 export default function VehicleDetails() {
 	const token = localStorage.getItem('token')
 	const [assignments, setAssignments] = useState<Assignment[]>([])
@@ -21,6 +35,8 @@ export default function VehicleDetails() {
 	const { id } = useParams()
 	const { state } = useLocation()
 	const [vehicleStatus, setVehicleStatus] = useState(state.status)
+	const [incidents, setIncidents] = useState<Incident[]>([])
+	const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
 
 	let statusFormatted = ''
 	if (vehicleStatus === 'available') {
@@ -46,9 +62,7 @@ export default function VehicleDetails() {
 		try {
 			await fetch(`${API_URL}/assignments-end/${id}`, {
 				method: 'PATCH',
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
+				headers: { Authorization: `Bearer ${token}` },
 			})
 			setRefreshTrigger(prev => prev + 1)
 		} catch (err) {
@@ -82,13 +96,53 @@ export default function VehicleDetails() {
 		}
 	}
 
+	const resolveIncident = async (incidentId: number) => {
+		try {
+			await fetch(`${API_URL}/incidents/${incidentId}/resolve`, {
+				method: 'PATCH',
+				headers: { Authorization: `Bearer ${token}` },
+			})
+			setSelectedIncident(null)
+			setRefreshTrigger(prev => prev + 1)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	const withdrawForIncident = async (incidentId: number) => {
+		try {
+			await fetch(`${API_URL}/incidents/${incidentId}/withdraw`, {
+				method: 'PATCH',
+				headers: { Authorization: `Bearer ${token}` },
+			})
+			setSelectedIncident(null)
+			setVehicleStatus('in_service')
+			setRefreshTrigger(prev => prev + 1)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	useEffect(() => {
+		const fetchIncidents = async () => {
+			try {
+				const res = await fetch(`${API_URL}/vehicles/${id}/incidents`, {
+					headers: { Authorization: `Bearer ${token}` },
+				})
+				const data = await res.json()
+				setIncidents(res.ok ? data : [])
+			} catch (err) {
+				console.error(err)
+			}
+		}
+		fetchIncidents()
+	}, [id, token, refreshTrigger])
+
 	useEffect(() => {
 		const fetchAssignments = async () => {
 			try {
 				const res = await fetch(`${API_URL}/assignments-vehicle/${id}`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+					headers: { Authorization: `Bearer ${token}` },
 				})
 				const data = await res.json()
 				setAssignments(res.ok ? data.assignments : [])
@@ -97,7 +151,6 @@ export default function VehicleDetails() {
 				console.error(err)
 			}
 		}
-
 		fetchAssignments()
 	}, [id, token, refreshTrigger])
 
@@ -121,21 +174,24 @@ export default function VehicleDetails() {
 								{state.brand ?? '-'} {state.model ?? '-'}
 							</td>
 							<td className="py-5 font-medium text-base-content">Issues</td>
-							<td className="py-5 flex gap-2">
-								{vehicleStatus === 'unavailable' ? (
-									<span className="badge badge-soft badge-error text-xs">Not Applicable - withdrawn</span>
-								) : (
-									<>
-										{' '}
-										<span className="badge badge-soft badge-success">
-											<span className="icon-[tabler--circle-check] size-4"></span>
-											Everything OK
-										</span>
-										<button className="btn btn-soft btn-warning btn-sm">
-											<span className="icon-[tabler--alert-triangle] size-4"></span>
-											Issue
+							<td className="py-5 flex gap-2 flex-wrap">
+								{vehicleStatus === 'in_service' ? (
+									<span className="badge badge-soft badge-error text-xs">Not applicable - withdrawn</span>
+								) : incidents.length > 0 ? (
+									incidents.map(incident => (
+										<button
+											key={incident.id}
+											className="btn btn-soft btn-warning btn-sm"
+											onClick={() => setSelectedIncident(incident)}>
+											<span className="icon-[tabler--alert-triangle] size-4" />
+											Damage detected
 										</button>
-									</>
+									))
+								) : (
+									<span className="badge badge-soft badge-success">
+										<span className="icon-[tabler--circle-check] size-4" />
+										Everything OK
+									</span>
 								)}
 							</td>
 						</tr>
@@ -146,12 +202,12 @@ export default function VehicleDetails() {
 							<td className="py-5">
 								{vehicleStatus === 'available' ? (
 									<button className="btn btn-soft btn-sm" onClick={withdrawFromFleet}>
-										<span className="icon-[tabler--arrow-back] size-4"></span>
+										<span className="icon-[tabler--arrow-back] size-4" />
 										Withdraw from Fleet
 									</button>
 								) : (
 									<button className="btn btn-soft btn-sm" onClick={returnToFleet}>
-										<span className="icon-[tabler--arrow-back] size-4"></span>
+										<span className="icon-[tabler--arrow-back] size-4" />
 										Return to Fleet
 									</button>
 								)}
@@ -163,14 +219,14 @@ export default function VehicleDetails() {
 							<td className="py-5 font-medium text-base-content">Incident History</td>
 							<td className="py-5">
 								<button className="btn btn-soft btn-sm">
-									<span className="icon-[tabler--history] size-4"></span>
+									<span className="icon-[tabler--history] size-4" />
 									View History
 								</button>
 							</td>
 						</tr>
 						<tr>
 							<td className="py-5 font-medium text-base-content">Mileage</td>
-							<td className="py-5 text-base-content/80">{state.mileage ? `${state.mileage} km` : `-`}</td>
+							<td className="py-5 text-base-content/80">{state.mileage ? `${state.mileage} km` : '-'}</td>
 							<td className="py-5 font-medium text-base-content">Assignment Log</td>
 							<td className="py-5">
 								<AssignmentsModal assignments={assignments} vehicleId={id} downloadHandler={downloadImage} />
@@ -178,7 +234,7 @@ export default function VehicleDetails() {
 						</tr>
 						<tr>
 							<td className="py-5 font-medium text-base-content">Fuel level</td>
-							<td className="py-5 text-base-content/80">{state.fuelLevel ? `${state.fuelLevel}%` : `-`}</td>
+							<td className="py-5 text-base-content/80">{state.fuelLevel ? `${state.fuelLevel}%` : '-'}</td>
 							<td></td>
 							<td></td>
 						</tr>
@@ -195,7 +251,7 @@ export default function VehicleDetails() {
 									{assigned ? `${assigned.users.first_name} ${assigned.users.last_name}` : 'Not assigned'}
 									{assigned && (
 										<button className="btn btn-soft btn-error btn-sm" onClick={endAssignment}>
-											<span className="icon-[tabler--user-minus] size-4"></span>
+											<span className="icon-[tabler--user-minus] size-4" />
 											End
 										</button>
 									)}
@@ -207,6 +263,54 @@ export default function VehicleDetails() {
 					</tbody>
 				</table>
 			</div>
+
+			{selectedIncident && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center">
+					<div className="fixed inset-0 bg-black/50" onClick={() => setSelectedIncident(null)} />
+					<div className="relative z-10 bg-base-100 rounded-lg shadow-xl w-full max-w-2xl mx-4 p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+						<div className="flex items-start justify-between">
+							<h3 className="text-lg font-semibold">Damage Report</h3>
+							<button
+								type="button"
+								className="btn btn-text btn-circle btn-sm"
+								onClick={() => setSelectedIncident(null)}>
+								<span className="icon-[tabler--x] size-4" />
+							</button>
+						</div>
+						<p className="text-base-content/80">{selectedIncident.ai_description}</p>
+						<div className="grid grid-cols-2 gap-3">
+							{selectedIncident.vehicle_incident_images.map(img => (
+								<div key={img.id}>
+									<p className="text-xs text-base-content/50 mb-1 capitalize">
+										{img.image_type === 'base' ? 'Reference' : 'After trip'} - {img.side}
+									</p>
+									<img
+										src={img.azure_blob_url}
+										alt={`${img.image_type} ${img.side}`}
+										className="rounded w-full object-cover aspect-video"
+									/>
+								</div>
+							))}
+						</div>
+						<div className="flex justify-end gap-2 pt-2 border-t border-base-content/25">
+							<button
+								type="button"
+								className="btn btn-soft btn-success btn-sm"
+								onClick={() => resolveIncident(selectedIncident.id)}>
+								<span className="icon-[tabler--circle-check] size-4" />
+								Mark as OK
+							</button>
+							<button
+								type="button"
+								className="btn btn-soft btn-error btn-sm"
+								onClick={() => withdrawForIncident(selectedIncident.id)}>
+								<span className="icon-[tabler--arrow-back] size-4" />
+								Withdraw from Fleet
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</PageTransition>
 	)
 }
