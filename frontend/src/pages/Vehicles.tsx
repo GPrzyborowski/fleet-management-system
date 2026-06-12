@@ -23,12 +23,10 @@ export default function Vehicles() {
 	const [refreshTrigger, setRefreshTrigger] = useState(0)
 
 	useEffect(() => {
-		const getEmployees = async () => {
+		const getVehicles = async () => {
 			try {
 				const res = await fetch(`${API_URL}/vehicles`, {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+					headers: { Authorization: `Bearer ${token}` },
 				})
 				const data = await res.json()
 				setVehicles(res.ok ? data : [])
@@ -38,26 +36,15 @@ export default function Vehicles() {
 				setPending(false)
 			}
 		}
-		getEmployees()
+		getVehicles()
 	}, [refreshTrigger, token])
 
-	const addVehicle = async (
-		licensePlate: string,
-		brand: string,
-		model: string,
-		year: number,
-		mileage: number,
-		fuelLevel: number,
-		status: string,
-	) => {
+	const addVehicle = async (body: FormData) => {
 		try {
 			const res = await fetch(`${API_URL}/vehicles`, {
 				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ licensePlate, brand, model, year, mileage, fuelLevel, status }),
+				headers: { Authorization: `Bearer ${token}` },
+				body,
 			})
 			if (res.ok) {
 				const { HSOverlay } = await import('flyonui/flyonui')
@@ -101,7 +88,7 @@ export default function Vehicles() {
 				headers: { Authorization: `Bearer ${token}` },
 			})
 			if (res.ok) {
-				setVehicles(prev => prev.filter(veh => veh.id != id))
+				setVehicles(prev => prev.filter(veh => veh.id !== id))
 			}
 		} catch (err) {
 			console.error(err)
@@ -132,24 +119,22 @@ export default function Vehicles() {
 								</tr>
 							</thead>
 							<tbody>
-								{vehicles.map(vehicle => {
-									return (
-										<VehicleRow
-											key={vehicle.id}
-											id={vehicle.id}
-											licensePlate={vehicle.license_plate}
-											brand={vehicle.brand}
-											model={vehicle.model}
-											year={vehicle.year_of_manufacture}
-											mileage={vehicle.current_mileage}
-											fuelLevel={vehicle.current_fuel_level}
-											status={vehicle.status}
-											removeHandler={removeVehicle}
-											updateHandler={updateVehicle}
-											onUpdate={() => setRefreshTrigger(prev => prev + 1)}
-										/>
-									)
-								})}
+								{vehicles.map(vehicle => (
+									<VehicleRow
+										key={vehicle.id}
+										id={vehicle.id}
+										licensePlate={vehicle.license_plate}
+										brand={vehicle.brand}
+										model={vehicle.model}
+										year={vehicle.year_of_manufacture}
+										mileage={vehicle.current_mileage}
+										fuelLevel={vehicle.current_fuel_level}
+										status={vehicle.status}
+										removeHandler={removeVehicle}
+										updateHandler={updateVehicle}
+										onUpdate={() => setRefreshTrigger(prev => prev + 1)}
+									/>
+								))}
 							</tbody>
 						</table>
 					</>
