@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { io, Socket } from 'socket.io-client'
+import { API_URL, SOCKET_URL } from '../config/api'
 
 type Props = {
 	licensePlate: string
-	onReturn: (data: ReturnFormData) => void
+	assignmentId: number
+	onReturn: () => void
 }
 
-export type ReturnFormData = {
+type FormData = {
 	dashboardImage: File | null
 	mileage: string
 	fuelLevel: string
@@ -17,33 +20,44 @@ export type ReturnFormData = {
 
 type FileInputProps = {
 	label: string
-	fileKey: keyof ReturnFormData
+	fileKey: keyof FormData
 	value: File | null
-	onChange: (key: keyof ReturnFormData, file: File | null) => void
+	onFileChange?: (file: File) => void
+	onFormDataChange?: (key: keyof FormData, file: File) => void
 }
 
-function FileInput({ label, fileKey, value, onChange }: FileInputProps) {
+function FileInput({ label, fileKey, value, onFileChange, onFormDataChange }: FileInputProps) {
 	return (
 		<div>
 			<label className="label-text mb-1 block">{label}</label>
 			<label className="flex items-center gap-2 cursor-pointer">
 				<span className="btn btn-accent btn-sm">Choose file</span>
-				<span className="text-sm text-base-content/60 truncate">{value?.name ?? 'No file chosen'}</span>
+				<span className="text-sm text-base-content/60 truncate max-w-36">{value?.name ?? 'No file chosen'}</span>
 				<input
 					type="file"
 					accept="image/*"
 					className="sr-only"
-					onChange={e => onChange(fileKey, e.target.files?.[0] ?? null)}
+					onChange={e => {
+						const file = e.target.files?.[0] ?? null
+						if (!file) return
+						if (onFileChange) {
+							onFileChange(file)
+						} else if (onFormDataChange) {
+							onFormDataChange(fileKey, file)
+						}
+					}}
 				/>
 			</label>
 		</div>
 	)
 }
 
-export default function ReturnModal({ licensePlate, onReturn }: Props) {
+export default function ReturnModal({ licensePlate, assignmentId, onReturn }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 	const [step, setStep] = useState(1)
-	const [formData, setFormData] = useState<ReturnFormData>({
+	const [ocrLoading, setOcrLoading] = useState(false)
+	const [dashboardImageUrl, setDashboardImageUrl] = useState<string | null>(null)
+	const [formData, setFormData] = useState<FormData>({
 		dashboardImage: null,
 		mileage: '',
 		fuelLevel: '',
@@ -53,9 +67,37 @@ export default function ReturnModal({ licensePlate, onReturn }: Props) {
 		backImage: null,
 	})
 
-	const handleClose = () => {
-		setIsOpen(false)
+	const socketRef = useRef<Socket | null>(null)
+	const socketIdRef = useRef<string>('')
+	const token = localStorage.getItem('token')
+
+	useEffect(() => {
+		const socket = io(SOCKET_URL)
+		socketRef.current = socket
+
+		socket.on('connect', () => {
+			socketIdRef.current = socket.id ?? ''
+			socket.emit('join', socket.id)
+		})
+
+		socket.on('dashboard-ocr-result', (data: { mileage: number | null; fuelLevel: number | null }) => {
+			setFormData(prev => ({
+				...prev,
+				mileage: data.mileage != null ? String(data.mileage) : prev.mileage,
+				fuelLevel: data.fuelLevel != null ? String(data.fuelLevel) : prev.fuelLevel,
+			}))
+			setOcrLoading(false)
+		})
+
+		return () => {
+			socket.disconnect()
+		}
+	}, [])
+
+	const resetForm = () => {
 		setStep(1)
+		setOcrLoading(false)
+		setDashboardImageUrl(null)
 		setFormData({
 			dashboardImage: null,
 			mileage: '',
@@ -67,21 +109,64 @@ export default function ReturnModal({ licensePlate, onReturn }: Props) {
 		})
 	}
 
-	const handleReturn = () => {
-		onReturn(formData)
-		handleClose()
+	const handleClose = () => {
+		setIsOpen(false)
+		resetForm()
 	}
 
-	const handleFileChange = (key: keyof ReturnFormData, file: File | null) => {
+	const handleDashboardUpload = async (file: File) => {
+		setFormData(prev => ({ ...prev, dashboardImage: file, mileage: '', fuelLevel: '' }))
+		setOcrLoading(true)
+
+		const body = new FormData()
+		body.append('image', file)
+		body.append('socketId', socketIdRef.current)
+
+		try {
+			const res = await fetch(`${API_URL}/assignments/dashboard-image`, {
+				method: 'POST',
+				headers: { Authorization: `Bearer ${token}` },
+				body,
+			})
+			const data = await res.json()
+			setDashboardImageUrl(data.imageUrl)
+		} catch (err) {
+			console.error(err)
+			setOcrLoading(false)
+		}
+	}
+
+	const handleFormDataChange = (key: keyof FormData, file: File) => {
 		setFormData(prev => ({ ...prev, [key]: file }))
+	}
+
+	const handleReturn = async () => {
+		const body = new FormData()
+		body.append('mileage', formData.mileage)
+		body.append('fuelLevel', formData.fuelLevel)
+		body.append('dashboardImageUrl', dashboardImageUrl ?? '')
+
+		if (formData.frontImage) body.append('frontImage', formData.frontImage)
+		if (formData.leftImage) body.append('leftImage', formData.leftImage)
+		if (formData.rightImage) body.append('rightImage', formData.rightImage)
+		if (formData.backImage) body.append('backImage', formData.backImage)
+
+		try {
+			await fetch(`${API_URL}/assignments/return/${assignmentId}`, {
+				method: 'POST',
+				headers: { Authorization: `Bearer ${token}` },
+				body,
+			})
+			onReturn()
+			handleClose()
+		} catch (err) {
+			console.error(err)
+		}
 	}
 
 	return (
 		<>
-			<button
-				type="button"
-				className="btn btn-accent px-4 py-2 text-white shadow-md hover:bg-accent-focus transition-colors flex items-center justify-center"
-				onClick={() => setIsOpen(true)}>
+			<button type="button" className="btn btn-accent text-white" onClick={() => setIsOpen(true)}>
 				Return
 			</button>
 
@@ -127,8 +212,14 @@ export default function ReturnModal({ licensePlate, onReturn }: Props) {
 								label="Add dashboard picture"
 								fileKey="dashboardImage"
 								value={formData.dashboardImage}
-								onChange={handleFileChange}
+								onFileChange={handleDashboardUpload}
 							/>
+							{ocrLoading && (
+								<div className="flex items-center gap-2 text-sm text-base-content/60">
+									<span className="loading loading-spinner loading-xs" />
+									Reading dashboard data...
+								</div>
+							)}
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<label className="label-text mb-1 block">Mileage</label>
@@ -152,9 +243,9 @@ export default function ReturnModal({ licensePlate, onReturn }: Props) {
 								</div>
 							</div>
 							<p className="text-xs text-base-content/50">
-								If the information was read correctly, press <strong>Next</strong>. Otherwise, enter correct data
-								manually above.
+								If the information was read correctly, press <strong>Next</strong>.
 							</p>
+							<p className='text-xs text-base-content/50'>Otherwise, enter correct data manually above.</p>
 						</div>
 					)}
 
@@ -169,7 +260,13 @@ export default function ReturnModal({ licensePlate, onReturn }: Props) {
 										{ label: 'Back picture', key: 'backImage' },
 									] as const
 								).map(({ label, key }) => (
-									<FileInput key={key} label={label} fileKey={key} value={formData[key]} onChange={handleFileChange} />
+									<FileInput
+										key={key}
+										label={label}
+										fileKey={key}
+										value={formData[key]}
+										onFormDataChange={handleFormDataChange}
+									/>
 								))}
 							</div>
 						</div>
@@ -188,14 +285,18 @@ export default function ReturnModal({ licensePlate, onReturn }: Props) {
 						)}
 
 						{step === 1 ? (
-							<button type="button" className="btn btn-accent text-white" onClick={() => setStep(2)}>
+							<button
+								type="button"
+								className="btn btn-accent text-white"
+								disabled={ocrLoading || !formData.dashboardImage}
+								onClick={() => setStep(2)}>
 								Next
 								<span className="icon-[tabler--chevron-right] size-4" />
 							</button>
 						) : (
 							<button type="button" className="btn btn-accent text-white" onClick={handleReturn}>
 								<span className="icon-[tabler--check] size-4" />
-								Return vehicle
+								Return
 							</button>
 						)}
 					</div>

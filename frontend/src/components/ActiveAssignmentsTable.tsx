@@ -23,9 +23,10 @@ interface Assignment {
 
 interface Props {
 	activeAssignments: Assignment[]
+	onReturn: () => void
 }
 
-export default function ActiveAssignmentsTable({ activeAssignments }: Props) {
+export default function ActiveAssignmentsTable({ activeAssignments, onReturn }: Props) {
 	return (
 		<div className="w-full px-4 sm:px-12 lg:px-24 xl:px-32 overflow-x-auto flex flex-col justify-center">
 			<h2 className="text-2xl font-medium tracking-tight text-base-content mb-10 text-center">
@@ -41,18 +42,17 @@ export default function ActiveAssignmentsTable({ activeAssignments }: Props) {
 					</tr>
 				</thead>
 				<tbody>
-					{activeAssignments.map(assignment => {
-						return (
-							<ActiveAssignmentsRow
-								key={assignment.id}
-								id={assignment.id}
-								licensePlate={assignment.vehicles.license_plate}
-								brand={assignment.vehicles.brand}
-								model={assignment.vehicles.model}
-								startDate={assignment.start_time}
-							/>
-						)
-					})}
+					{activeAssignments.map(assignment => (
+						<ActiveAssignmentsRow
+							key={assignment.id}
+							id={assignment.id}
+							licensePlate={assignment.vehicles.license_plate}
+							brand={assignment.vehicles.brand}
+							model={assignment.vehicles.model}
+							startDate={assignment.start_time}
+							onReturn={onReturn}
+						/>
+					))}
 				</tbody>
 			</table>
 		</div>

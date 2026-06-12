@@ -4,7 +4,6 @@ import PageTransition from '../components/PageTransition'
 import Header from '../components/Header'
 import ActionCard from '../components/ActionCard'
 import ActiveAssignmentsTable from '../components/ActiveAssignmentsTable'
-import ReturnModal from '../components/ReturnModal'
 import { API_URL } from '../config/api'
 
 interface TokenPayload {
@@ -92,17 +91,15 @@ export default function Dashboard() {
 					/>
 				</div>
 			)}
-			{role == 'driver' && (
-				<>
-					<ActiveAssignmentsTable activeAssignments={activeAssignments} />
-					<ReturnModal
-						licensePlate="GD 12345"
-						onReturn={data => {
-							console.log(data)
-						}}
+			{role == 'driver' &&
+				(activeAssignments.length > 0 ? (
+					<ActiveAssignmentsTable
+						activeAssignments={activeAssignments}
+						onReturn={() => getActiveAssignments(new AbortController().signal)}
 					/>
-				</>
-			)}
+				) : (
+					''
+				))}
 		</PageTransition>
 	)
 }

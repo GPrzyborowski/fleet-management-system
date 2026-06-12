@@ -1,16 +1,35 @@
 import { useState, useEffect } from 'react'
 
 type Props = {
-	addHandler: (
-		licensePlate: string,
-		brand: string,
-		model: string,
-		year: number,
-		mileage: number,
-		fuelLevel: number,
-		status: string,
-	) => Promise<void>
+	addHandler: (formData: FormData) => Promise<void>
 	onUpdate: () => void
+}
+
+type FileInputProps = {
+	label: string
+	value: File | null
+	onChange: (file: File) => void
+}
+
+function FileInput({ label, value, onChange }: FileInputProps) {
+	return (
+		<div>
+			<label className="label-text cursor-text">{label}</label>
+			<label className="flex items-center gap-2 cursor-pointer mt-1">
+				<span className="btn btn-accent btn-sm">Choose file</span>
+				<span className="text-sm text-base-content/60 truncate max-w-48">{value?.name ?? 'No file chosen'}</span>
+				<input
+					type="file"
+					accept="image/*"
+					className="sr-only"
+					onChange={e => {
+						const file = e.target.files?.[0]
+						if (file) onChange(file)
+					}}
+				/>
+			</label>
+		</div>
+	)
 }
 
 export default function NewVehicleModal({ addHandler, onUpdate }: Props) {
@@ -21,6 +40,10 @@ export default function NewVehicleModal({ addHandler, onUpdate }: Props) {
 	const [mileage, setMileage] = useState('')
 	const [fuelLevel, setFuelLevel] = useState('')
 	const [status, setStatus] = useState('available')
+	const [frontImage, setFrontImage] = useState<File | null>(null)
+	const [leftImage, setLeftImage] = useState<File | null>(null)
+	const [rightImage, setRightImage] = useState<File | null>(null)
+	const [backImage, setBackImage] = useState<File | null>(null)
 
 	useEffect(() => {
 		const init = async () => {
@@ -60,7 +83,19 @@ export default function NewVehicleModal({ addHandler, onUpdate }: Props) {
 						<form
 							onSubmit={async e => {
 								e.preventDefault()
-								await addHandler(licensePlate, brand, model, Number(year), Number(mileage), Number(fuelLevel), status)
+								const body = new FormData()
+								body.append('licensePlate', licensePlate)
+								body.append('brand', brand)
+								body.append('model', model)
+								body.append('year', year)
+								body.append('mileage', mileage)
+								body.append('fuelLevel', fuelLevel)
+								body.append('status', status)
+								if (frontImage) body.append('frontImage', frontImage)
+								if (leftImage) body.append('leftImage', leftImage)
+								if (rightImage) body.append('rightImage', rightImage)
+								if (backImage) body.append('backImage', backImage)
+								await addHandler(body)
 								onUpdate()
 							}}>
 							<div className="modal-body pt-0 flex flex-col gap-4">
@@ -142,6 +177,15 @@ export default function NewVehicleModal({ addHandler, onUpdate }: Props) {
 										<option value="available">Available</option>
 										<option value="unavailable">Not available</option>
 									</select>
+								</div>
+								<div className="border-t border-base-content/25 pt-4">
+									<p className="text-sm font-medium mb-3">Base reference photos</p>
+									<div className="grid grid-cols-2 gap-3">
+										<FileInput label="Front" value={frontImage} onChange={setFrontImage} />
+										<FileInput label="Left" value={leftImage} onChange={setLeftImage} />
+										<FileInput label="Right" value={rightImage} onChange={setRightImage} />
+										<FileInput label="Back" value={backImage} onChange={setBackImage} />
+									</div>
 								</div>
 							</div>
 							<div className="modal-footer">

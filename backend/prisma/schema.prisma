@@ -8,30 +8,6 @@ datasource db {
   provider = "postgresql"
 }
 
-model service_intervals {
-  id                   Int       @id @default(autoincrement())
-  vehicle_id           Int?
-  element_name         String    @db.VarChar(50)
-  interval_km          Int?
-  interval_months      Int?
-  last_service_mileage Int       @default(0)
-  last_service_date    DateTime  @db.Date
-  vehicles             vehicles? @relation(fields: [vehicle_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([vehicle_id, element_name])
-}
-
-model service_logs {
-  id              Int       @id @default(autoincrement())
-  vehicle_id      Int?
-  element_name    String    @db.VarChar(50)
-  service_date    DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
-  service_mileage Int
-  description     String?
-  cost            Decimal?  @db.Decimal(10, 2)
-  vehicles        vehicles? @relation(fields: [vehicle_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
 model users {
   id                  Int                   @id @default(autoincrement())
   login               String                @unique @db.VarChar(50)
@@ -47,20 +23,36 @@ model users {
   vehicle_assignments vehicle_assignments[]
 }
 
+model vehicles {
+  id                    Int                     @id @default(autoincrement())
+  license_plate         String                  @unique @db.VarChar(15)
+  brand                 String                  @db.VarChar(50)
+  model                 String                  @db.VarChar(50)
+  year_of_manufacture   Int
+  current_mileage       Int                     @default(0)
+  current_fuel_level    Int                     @default(100)
+  status                String?                 @default("available") @db.VarChar(20)
+  created_at            DateTime?               @default(now()) @db.Timestamp(6)
+  vehicle_assignments   vehicle_assignments[]
+  vehicle_status_images vehicle_status_images[]
+  vehicle_incidents     vehicle_incidents[]
+}
+
 model vehicle_assignments {
-  id                  Int       @id @default(autoincrement())
+  id                  Int                 @id @default(autoincrement())
   vehicle_id          Int?
   driver_id           Int?
-  start_time          DateTime  @default(now()) @db.Timestamp(6)
-  end_time            DateTime? @db.Timestamp(6)
+  start_time          DateTime            @default(now()) @db.Timestamp(6)
+  end_time            DateTime?           @db.Timestamp(6)
   start_mileage       Int
   end_mileage         Int?
   start_fuel_level    Int
   end_fuel_level      Int?
   dashboard_image_url String?
-  status              String?   @default("active") @db.VarChar(25)
-  users               users?    @relation(fields: [driver_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  vehicles            vehicles? @relation(fields: [vehicle_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  status              String?             @default("active") @db.VarChar(25)
+  users               users?              @relation(fields: [driver_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  vehicles            vehicles?           @relation(fields: [vehicle_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  vehicle_incidents   vehicle_incidents[]
 }
 
 model vehicle_status_images {
@@ -74,18 +66,23 @@ model vehicle_status_images {
   @@unique([vehicle_id, side])
 }
 
-model vehicles {
-  id                    Int                     @id @default(autoincrement())
-  license_plate         String                  @unique @db.VarChar(15)
-  brand                 String                  @db.VarChar(50)
-  model                 String                  @db.VarChar(50)
-  year_of_manufacture   Int
-  current_mileage       Int                     @default(0)
-  current_fuel_level    Int                     @default(100)
-  status                String?                 @default("available") @db.VarChar(20)
-  created_at            DateTime?               @default(now()) @db.Timestamp(6)
-  service_intervals     service_intervals[]
-  service_logs          service_logs[]
-  vehicle_assignments   vehicle_assignments[]
-  vehicle_status_images vehicle_status_images[]
+model vehicle_incidents {
+  id                      Int                       @id @default(autoincrement())
+  vehicle_id              Int
+  assignment_id           Int?
+  ai_description          String
+  status                  String                    @default("pending")
+  created_at              DateTime                  @default(now())
+  vehicles                vehicles                  @relation(fields: [vehicle_id], references: [id], onDelete: Cascade)
+  vehicle_assignments     vehicle_assignments?      @relation(fields: [assignment_id], references: [id], onDelete: SetNull)
+  vehicle_incident_images vehicle_incident_images[]
+}
+
+model vehicle_incident_images {
+  id                Int               @id @default(autoincrement())
+  incident_id       Int
+  side              String
+  azure_blob_url    String
+  image_type        String
+  vehicle_incidents vehicle_incidents @relation(fields: [incident_id], references: [id], onDelete: Cascade)
 }
