@@ -38,17 +38,6 @@ CREATE TABLE vehicle_assignments (
     status VARCHAR(25) DEFAULT 'active'
 );
 
-CREATE TABLE service_intervals (
-    id SERIAL PRIMARY KEY,
-    vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
-    element_name VARCHAR(50) NOT NULL,
-    interval_km INT,
-    interval_months INT,
-    last_service_mileage INT NOT NULL DEFAULT 0,
-    last_service_date DATE NOT NULL,
-    UNIQUE(vehicle_id, element_name)
-);
-
 CREATE TABLE vehicle_status_images (
     id SERIAL PRIMARY KEY,
     vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
@@ -58,14 +47,21 @@ CREATE TABLE vehicle_status_images (
     UNIQUE(vehicle_id, side)
 );
 
-CREATE TABLE service_logs (
+CREATE TABLE vehicle_incidents (
     id SERIAL PRIMARY KEY,
     vehicle_id INT REFERENCES vehicles(id) ON DELETE CASCADE,
-    element_name VARCHAR(50) NOT NULL,
-    service_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    service_mileage INT NOT NULL,
-    description TEXT,
-    cost DECIMAL(10, 2)
+    assignment_id INT REFERENCES vehicle_assignments(id) ON DELETE SET NULL,
+    ai_description TEXT NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE vehicle_incident_images (
+    id SERIAL PRIMARY KEY,
+    incident_id INT REFERENCES vehicle_incidents(id) ON DELETE CASCADE,
+    side VARCHAR(20) NOT NULL,
+    azure_blob_url TEXT NOT NULL,
+    image_type VARCHAR(10) NOT NULL
 );
 
 INSERT INTO users (login, first_name, last_name, email, password_hash, phone_number, role, is_active, is_employed) VALUES
@@ -87,31 +83,3 @@ INSERT INTO vehicle_assignments (vehicle_id, driver_id, start_time, end_time, st
 (2, 3, '2025-02-15 07:00:00', '2025-02-15 15:00:00', 229000, 230000, 70, 60, '', 'completed'),
 (3, 4, '2025-03-20 06:00:00', NULL, 89500, NULL, 100, NULL, '', 'active'),
 (1, 5, '2025-04-01 09:00:00', '2025-04-01 17:00:00', 148000, 149000, 95, 90, '', 'completed');
-
-INSERT INTO service_intervals (vehicle_id, element_name, interval_km, interval_months, last_service_mileage, last_service_date) VALUES
-(1, 'Oil change', 15000, 12, 140000, '2024-06-01'),
-(1, 'Brake inspection', 30000, 24, 120000, '2024-01-15'),
-(2, 'Oil change', 15000, 12, 220000, '2024-08-10'),
-(2, 'Tire rotation', 20000, NULL, 210000, '2024-05-20'),
-(3, 'Oil change', 15000, 12, 80000, '2024-09-01'),
-(4, 'Oil change', 15000, 12, 300000, '2024-03-10'),
-(4, 'Brake inspection', 30000, 24, 280000, '2023-11-05'),
-(5, 'Oil change', 15000, 12, 40000, '2024-11-15');
-
-INSERT INTO service_logs (vehicle_id, element_name, service_date, service_mileage, description, cost) VALUES
-(1, 'Oil change', '2024-06-01', 140000, 'Regular oil and filter change.', 350.00),
-(1, 'Brake inspection', '2024-01-15', 120000, 'Front brake pads replaced.', 800.00),
-(2, 'Oil change', '2024-08-10', 220000, 'Regular oil and filter change.', 350.00),
-(2, 'Tire rotation', '2024-05-20', 210000, 'All tires rotated and balanced.', 200.00),
-(3, 'Oil change', '2024-09-01', 80000, 'Regular oil and filter change.', 350.00),
-(4, 'Oil change', '2024-03-10', 300000, 'Regular oil and filter change.', 350.00),
-(4, 'Brake inspection', '2023-11-05', 280000, 'Rear brake pads replaced.', 750.00),
-(5, 'Oil change', '2024-11-15', 40000, 'Regular oil and filter change.', 350.00);
-
-INSERT INTO vehicle_status_images (vehicle_id, side, azure_blob_url, updated_at) VALUES
-(1, 'front', 'https://example.blob.core.windows.net/vehicles/gd12345-front.jpg', '2025-01-10 16:00:00'),
-(1, 'rear', 'https://example.blob.core.windows.net/vehicles/gd12345-rear.jpg', '2025-01-10 16:00:00'),
-(1, 'left', 'https://example.blob.core.windows.net/vehicles/gd12345-left.jpg', '2025-01-10 16:00:00'),
-(1, 'right', 'https://example.blob.core.windows.net/vehicles/gd12345-right.jpg', '2025-01-10 16:00:00'),
-(2, 'front', 'https://example.blob.core.windows.net/vehicles/gd67890-front.jpg', '2025-02-15 15:00:00'),
-(2, 'rear', 'https://example.blob.core.windows.net/vehicles/gd67890-rear.jpg', '2025-02-15 15:00:00');
