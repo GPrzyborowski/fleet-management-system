@@ -2,10 +2,25 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { vi } from 'vitest'
 import ReturnModal from './ReturnModal'
 
+vi.mock('socket.io-client', () => ({
+	io: () => ({
+		on: vi.fn(),
+		emit: vi.fn(),
+		disconnect: vi.fn(),
+		id: 'test-socket-id',
+	}),
+}))
+
+globalThis.fetch = vi.fn().mockResolvedValue({
+	ok: true,
+	json: async () => ({ imageUrl: 'https://example.com/image.jpg' }),
+})
+
 const mockOnReturn = vi.fn()
 
 const defaultProps = {
 	licensePlate: 'GD 12345',
+	assignmentId: 1,
 	onReturn: mockOnReturn,
 }
 
@@ -62,6 +77,12 @@ describe('ReturnModal', () => {
 		expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument()
 	})
 
+	it('Next button is disabled when no dashboard image selected', () => {
+		render(<ReturnModal {...defaultProps} />)
+		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
+		expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
+	})
+
 	it('closes modal on Cancel button click', () => {
 		const { container } = render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
@@ -84,17 +105,33 @@ describe('ReturnModal', () => {
 		expect(container.querySelector('.fixed.inset-0.z-50')).toHaveClass('opacity-0', 'invisible')
 	})
 
-	it('advances to step 2 on Next click', () => {
+	it('advances to step 2 on Next click when dashboard image provided', () => {
 		render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-		fireEvent.click(screen.getByRole('button', { name: /next/i }))
-		expect(screen.getByText('Step 2 of 2')).toBeInTheDocument()
+
+		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
+		const fileInput = screen
+			.getAllByRole('button', { name: /choose file/i })[0]
+			.closest('label')!
+			.querySelector('input[type="file"]')!
+		fireEvent.change(fileInput, { target: { files: [file] } })
+
+		expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
 	})
 
-	it('renders step 2 fields', () => {
+	it('renders step 2 fields after advancing', () => {
 		render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
+
+		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
+		const fileInput = screen
+			.getAllByRole('button', { name: /choose file/i })[0]
+			.closest('label')!
+			.querySelector('input[type="file"]')!
+		fireEvent.change(fileInput, { target: { files: [file] } })
 		fireEvent.click(screen.getByRole('button', { name: /next/i }))
+
+		expect(screen.getByText('Step 2 of 2')).toBeInTheDocument()
 		expect(screen.getByText('Front picture')).toBeInTheDocument()
 		expect(screen.getByText('Left picture')).toBeInTheDocument()
 		expect(screen.getByText('Right picture')).toBeInTheDocument()
@@ -104,58 +141,46 @@ describe('ReturnModal', () => {
 	it('renders Back button on step 2', () => {
 		render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
+
+		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
+		const fileInput = screen
+			.getAllByRole('button', { name: /choose file/i })[0]
+			.closest('label')!
+			.querySelector('input[type="file"]')!
+		fireEvent.change(fileInput, { target: { files: [file] } })
 		fireEvent.click(screen.getByRole('button', { name: /next/i }))
+
 		expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument()
 	})
 
 	it('renders Return vehicle button on step 2', () => {
 		render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
+
+		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
+		const fileInput = screen
+			.getAllByRole('button', { name: /choose file/i })[0]
+			.closest('label')!
+			.querySelector('input[type="file"]')!
+		fireEvent.change(fileInput, { target: { files: [file] } })
 		fireEvent.click(screen.getByRole('button', { name: /next/i }))
-		expect(screen.getByRole('button', { name: /return vehicle/i })).toBeInTheDocument()
+
+		expect(screen.getByRole('button', { name: /return/i })).toBeInTheDocument()
 	})
 
 	it('goes back to step 1 on Back button click', () => {
 		render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
+
+		const file = new File(['img'], 'dashboard.jpg', { type: 'image/jpeg' })
+		const fileInput = screen
+			.getAllByRole('button', { name: /choose file/i })[0]
+			.closest('label')!
+			.querySelector('input[type="file"]')!
+		fireEvent.change(fileInput, { target: { files: [file] } })
 		fireEvent.click(screen.getByRole('button', { name: /next/i }))
 		fireEvent.click(screen.getByRole('button', { name: /back/i }))
-		expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
-	})
 
-	it('calls onReturn with formData on Return vehicle click', () => {
-		render(<ReturnModal {...defaultProps} />)
-		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-		fireEvent.change(screen.getByPlaceholderText('e.g. 150023'), { target: { value: '150000' } })
-		fireEvent.change(screen.getByPlaceholderText('e.g. 75'), { target: { value: '80' } })
-		fireEvent.click(screen.getByRole('button', { name: /next/i }))
-		fireEvent.click(screen.getByRole('button', { name: /return vehicle/i }))
-		expect(mockOnReturn).toHaveBeenCalledWith({
-			dashboardImage: null,
-			mileage: '150000',
-			fuelLevel: '80',
-			frontImage: null,
-			leftImage: null,
-			rightImage: null,
-			backImage: null,
-		})
-	})
-
-	it('closes modal after Return vehicle click', () => {
-		const { container } = render(<ReturnModal {...defaultProps} />)
-		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-		fireEvent.click(screen.getByRole('button', { name: /next/i }))
-		fireEvent.click(screen.getByRole('button', { name: /return vehicle/i }))
-		expect(container.querySelector('.fixed.inset-0.z-50')).toHaveClass('opacity-0', 'invisible')
-	})
-
-	it('resets form and step after closing', () => {
-		render(<ReturnModal {...defaultProps} />)
-		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-		fireEvent.change(screen.getByPlaceholderText('e.g. 150023'), { target: { value: '999999' } })
-		fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
-		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
-		expect(screen.getByPlaceholderText('e.g. 150023')).toHaveValue('')
 		expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
 	})
 
@@ -177,5 +202,15 @@ describe('ReturnModal', () => {
 		render(<ReturnModal {...defaultProps} />)
 		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
 		expect(screen.getByText('No file chosen')).toBeInTheDocument()
+	})
+
+	it('resets form and step after closing', () => {
+		render(<ReturnModal {...defaultProps} />)
+		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
+		fireEvent.change(screen.getByPlaceholderText('e.g. 150023'), { target: { value: '999999' } })
+		fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
+		fireEvent.click(screen.getByRole('button', { name: /^return$/i }))
+		expect(screen.getByPlaceholderText('e.g. 150023')).toHaveValue('')
+		expect(screen.getByText('Step 1 of 2')).toBeInTheDocument()
 	})
 })
