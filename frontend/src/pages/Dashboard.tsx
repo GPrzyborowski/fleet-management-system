@@ -91,12 +91,15 @@ export default function Dashboard() {
 					/>
 				</div>
 			)}
-			{role == 'driver' && (
-				<ActiveAssignmentsTable
-					activeAssignments={activeAssignments}
-					onReturn={() => getActiveAssignments(new AbortController().signal)}
-				/>
-			)}
+			{role == 'driver' &&
+				(activeAssignments.length > 0 ? (
+					<ActiveAssignmentsTable
+						activeAssignments={activeAssignments}
+						onReturn={() => getActiveAssignments(new AbortController().signal)}
+					/>
+				) : (
+					''
+				))}
 		</PageTransition>
 	)
 }
