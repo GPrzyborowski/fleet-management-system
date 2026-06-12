@@ -2,6 +2,7 @@ import express from 'express'
 import multer from 'multer'
 import {
 	getVehicles,
+	getAllVehicleIncidents,
 	addVehicle,
 	updateVehicle,
 	returnToFleet,
@@ -13,6 +14,7 @@ const router = express.Router()
 const upload = multer({ storage: multer.memoryStorage() })
 
 router.get('/vehicles', getVehicles)
+router.get('/vehicles/:id/incidents/all', getAllVehicleIncidents)
 router.post(
 	'/vehicles',
 	upload.fields([
