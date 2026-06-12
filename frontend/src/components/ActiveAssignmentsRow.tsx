@@ -1,12 +1,15 @@
+import ReturnModal from './ReturnModal'
+
 type Props = {
 	id: number
 	licensePlate: string
 	brand: string
 	model: string
 	startDate: string
+	onReturn: () => void
 }
 
-export default function ActiveAssignmentsRow({ licensePlate, brand, model, startDate }: Props) {
+export default function ActiveAssignmentsRow({ id, licensePlate, brand, model, startDate, onReturn }: Props) {
 	const formatDate = (date: string | null) => {
 		if (!date) return '-'
 		return new Date(date).toLocaleString('pl-PL', {
@@ -26,9 +29,7 @@ export default function ActiveAssignmentsRow({ licensePlate, brand, model, start
 			</td>
 			<td>{formatDate(startDate)}</td>
 			<td>
-				<button className="btn btn-accent px-4 py-2 text-white shadow-md hover:bg-primary-focus transition-colors flex items-center justify-center">
-					Return
-				</button>
+				<ReturnModal licensePlate={licensePlate} assignmentId={id} onReturn={onReturn} />
 			</td>
 		</tr>
 	)
