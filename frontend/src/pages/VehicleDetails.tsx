@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import AssignmentsModal, { type Assignment } from '../components/AssignmentsModal'
+import IncidentHistoryModal from '../components/IncidentHistoryModal'
+import { type IncidentData } from '../components/IncidentRow'
 import PageTransition from '../components/PageTransition'
 import { API_URL } from '../config/api'
 
@@ -13,20 +15,6 @@ type AssignedDriver = {
 	}
 } | null
 
-type IncidentImage = {
-	id: number
-	side: string
-	azure_blob_url: string
-	image_type: string
-}
-
-type Incident = {
-	id: number
-	ai_description: string
-	created_at: string
-	vehicle_incident_images: IncidentImage[]
-}
-
 export default function VehicleDetails() {
 	const token = localStorage.getItem('token')
 	const [assignments, setAssignments] = useState<Assignment[]>([])
@@ -35,8 +23,9 @@ export default function VehicleDetails() {
 	const { id } = useParams()
 	const { state } = useLocation()
 	const [vehicleStatus, setVehicleStatus] = useState(state.status)
-	const [incidents, setIncidents] = useState<Incident[]>([])
-	const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
+	const [incidents, setIncidents] = useState<IncidentData[]>([])
+	const [selectedIncident, setSelectedIncident] = useState<IncidentData | null>(null)
+	const [allIncidents, setAllIncidents] = useState<IncidentData[]>([])
 
 	let statusFormatted = ''
 	if (vehicleStatus === 'available') {
@@ -122,6 +111,21 @@ export default function VehicleDetails() {
 			console.error(err)
 		}
 	}
+
+	useEffect(() => {
+		const fetchAllIncidents = async () => {
+			try {
+				const res = await fetch(`${API_URL}/vehicles/${id}/incidents/all`, {
+					headers: { Authorization: `Bearer ${token}` },
+				})
+				const data = await res.json()
+				setAllIncidents(res.ok ? data : [])
+			} catch (err) {
+				console.error(err)
+			}
+		}
+		fetchAllIncidents()
+	}, [id, token, refreshTrigger])
 
 	useEffect(() => {
 		const fetchIncidents = async () => {
@@ -218,10 +222,7 @@ export default function VehicleDetails() {
 							<td className="py-5 text-base-content/80">{state.year ?? '-'}</td>
 							<td className="py-5 font-medium text-base-content">Incident History</td>
 							<td className="py-5">
-								<button className="btn btn-soft btn-sm">
-									<span className="icon-[tabler--history] size-4" />
-									View History
-								</button>
+								<IncidentHistoryModal incidents={allIncidents} />
 							</td>
 						</tr>
 						<tr>
