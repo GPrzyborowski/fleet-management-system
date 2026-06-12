@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import prisma from '../config/prisma-client'
+import { uploadToCloudinary } from '../config/cloudinary'
 
 export const getVehicles = async (req: Request, res: Response) => {
 	try {
@@ -15,8 +16,10 @@ export const getVehicles = async (req: Request, res: Response) => {
 
 export const addVehicle = async (req: Request, res: Response) => {
 	const { licensePlate, brand, model, year, mileage, fuelLevel, status } = req.body
+	const files = req.files as Record<string, Express.Multer.File[]>
+
 	try {
-		await prisma.vehicles.create({
+		const vehicle = await prisma.vehicles.create({
 			data: {
 				license_plate: licensePlate,
 				brand,
@@ -28,6 +31,29 @@ export const addVehicle = async (req: Request, res: Response) => {
 				created_at: new Date(),
 			},
 		})
+
+		const SIDES = ['front', 'left', 'right', 'back'] as const
+		const sideToField: Record<string, string> = {
+			front: 'frontImage',
+			left: 'leftImage',
+			right: 'rightImage',
+			back: 'backImage',
+		}
+
+		for (const side of SIDES) {
+			const field = sideToField[side]
+			if (files?.[field]?.[0]) {
+				const url = await uploadToCloudinary(files[field][0].buffer, 'base-images')
+				await prisma.vehicle_status_images.create({
+					data: {
+						vehicle_id: vehicle.id,
+						side,
+						azure_blob_url: url,
+					},
+				})
+			}
+		}
+
 		res.status(201).json({ message: 'New vehicle was successfully added to database.' })
 	} catch (err) {
 		console.error(err)
@@ -101,12 +127,8 @@ export const returnToFleet = async (req: Request, res: Response) => {
 	}
 	try {
 		await prisma.vehicles.update({
-			where: {
-				id,
-			},
-			data: {
-				status: 'available',
-			},
+			where: { id },
+			data: { status: 'available' },
 		})
 		res.status(200).json({ message: 'Vehicle returned to fleet.' })
 	} catch (err) {
@@ -123,12 +145,8 @@ export const withdrawFromFleet = async (req: Request, res: Response) => {
 	}
 	try {
 		await prisma.vehicles.update({
-			where: {
-				id,
-			},
-			data: {
-				status: 'in_service',
-			},
+			where: { id },
+			data: { status: 'in_service' },
 		})
 		res.status(200).json({ message: 'Vehicle withdrawed from fleet.' })
 	} catch (err) {
