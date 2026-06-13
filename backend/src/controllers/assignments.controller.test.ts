@@ -30,6 +30,9 @@ vi.mock('../config/prisma-client', () => ({
 			findUnique: vi.fn(),
 			update: vi.fn(),
 		},
+		users: {
+			update: vi.fn(),
+		},
 	},
 }))
 
