@@ -139,11 +139,14 @@ export default function Dashboard() {
 					{activeAssignments.length > 0 && (
 						<ActiveAssignmentsTable
 							activeAssignments={activeAssignments}
-							onReturn={() => getActiveAssignments(new AbortController().signal)}
+							onReturn={() => {
+								getActiveAssignments(new AbortController().signal)
+								getAvailableVehicles(new AbortController().signal)
+							}}
 						/>
 					)}
 					{availableVehicles.length > 0 && (
-						<div className="w-full mb-12 px-4 sm:px-12 lg:px-24 xl:px-32">
+						<div className="w-full px-4 sm:px-12 lg:px-24 xl:px-32">
 							<h2 className="text-2xl font-medium tracking-tight text-base-content mb-10 text-center">
 								Available vehicles
 							</h2>
