@@ -55,7 +55,7 @@ export const startDamageCheckWorker = () => {
 
 			imageContent.push({
 				type: 'text',
-				text: 'Compare each BASE and NEW pair. Look for new scratches, dents, broken lights, or any damage not present in the base images. Respond ONLY with valid JSON, no markdown: {"damaged": boolean, "description": "string or null"}',
+				text: 'Compare each BASE and NEW pair. Look for new scratches, dents, broken lights, or any damage not present in the base images. Respond ONLY with valid JSON, no markdown, with this exact structure: {"damaged": boolean, "description": "combined description of all damage found, or null if no damage"}. Set damaged to true if ANY side has damage.',
 			})
 
 			const response = await openai.chat.completions.create({
@@ -65,17 +65,32 @@ export const startDamageCheckWorker = () => {
 			})
 
 			const content = response.choices[0].message.content ?? ''
+
 			const clean = content.replace(/```json|```/g, '').trim()
 
 			let result: { damaged: boolean; description: string | null }
 
 			try {
-				result = JSON.parse(clean)
+				const parsed = JSON.parse(clean)
+
+				if (typeof parsed.damaged === 'boolean') {
+					result = { damaged: parsed.damaged, description: parsed.description }
+				} else {
+					const sides = Object.values(parsed) as { damaged: boolean; description: string | null }[]
+					const anyDamaged = sides.some(s => s.damaged)
+					const descriptions = sides
+						.filter(s => s.damaged && s.description)
+						.map(s => s.description)
+						.join(' ')
+					result = { damaged: anyDamaged, description: anyDamaged ? descriptions : null }
+				}
 			} catch {
 				result = { damaged: false, description: null }
 			}
 
-			if (!result.damaged || !result.description) return
+			if (!result.damaged || !result.description) {
+				return
+			}
 
 			const incident = await prisma.vehicle_incidents.create({
 				data: {

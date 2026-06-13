@@ -15,6 +15,7 @@ vi.mock('../config/prisma-client', () => ({
 		},
 		vehicle_assignments: {
 			findMany: vi.fn(),
+			deleteMany: vi.fn(),
 		},
 		users: {
 			findMany: vi.fn(),
