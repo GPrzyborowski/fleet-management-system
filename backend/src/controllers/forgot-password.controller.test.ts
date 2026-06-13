@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from 'express'
 import request from 'supertest'
 import app from '../app'
 import { describe, it, expect, vi } from 'vitest'
@@ -11,6 +12,10 @@ vi.mock('../config/prisma-client', () => ({
 			findUnique: vi.fn(),
 		},
 	},
+}))
+
+vi.mock('../middleware/requireRole', () => ({
+	default: vi.fn(() => (req: Request, res: Response, next: NextFunction) => next()),
 }))
 
 vi.mock('../config/redis-client', () => ({

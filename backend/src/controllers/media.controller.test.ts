@@ -1,9 +1,15 @@
+import { Request, NextFunction } from 'express'
+import type { Response as ExpressResponse } from 'express'
 import request from 'supertest'
 import app from '../app'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../middleware/auth', () => ({
 	default: vi.fn((req, res, next) => next()),
+}))
+
+vi.mock('../middleware/requireRole', () => ({
+	default: vi.fn(() => (req: Request, res: ExpressResponse, next: NextFunction) => next()),
 }))
 
 const mockArrayBuffer = new ArrayBuffer(8)
