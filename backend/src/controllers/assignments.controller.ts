@@ -83,3 +83,71 @@ export const getActiveAssignmentsForEmployee = async (req: Request, res: Respons
 		return res.status(500).json({ error: 'Server error.' })
 	}
 }
+
+export const takeVehicle = async (req: Request, res: Response) => {
+	const driverId = req.user!.id
+	const vehicleId = Number(req.params.vehicleId)
+
+	if (!vehicleId || isNaN(vehicleId)) {
+		res.status(400).json({ message: 'Invalid data.' })
+		return
+	}
+
+	try {
+		const vehicle = await prisma.vehicles.findUnique({
+			where: { id: vehicleId },
+		})
+
+		if (!vehicle) {
+			res.status(404).json({ message: 'Vehicle not found.' })
+			return
+		}
+
+		if (vehicle.status !== 'available') {
+			res.status(409).json({ message: 'Vehicle is not available.' })
+			return
+		}
+
+		const existingAssignment = await prisma.vehicle_assignments.findFirst({
+			where: { driver_id: driverId, end_time: null },
+		})
+
+		if (existingAssignment) {
+			res.status(409).json({ message: 'You already have an active assignment.' })
+			return
+		}
+
+		await prisma.vehicle_assignments.create({
+			data: {
+				vehicle_id: vehicleId,
+				driver_id: driverId,
+				start_mileage: vehicle.current_mileage,
+				start_fuel_level: vehicle.current_fuel_level,
+				status: 'active',
+			},
+		})
+
+		await prisma.vehicles.update({
+			where: { id: vehicleId },
+			data: { status: 'in_use' },
+		})
+
+		res.status(201).json({ message: 'Vehicle assigned successfully.' })
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({ error: 'Server error.' })
+	}
+}
+
+export const getAvailableVehicles = async (req: Request, res: Response) => {
+	try {
+		const vehicles = await prisma.vehicles.findMany({
+			where: { status: 'available' },
+			orderBy: { brand: 'asc' },
+		})
+		res.status(200).json(vehicles)
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({ error: 'Server error.' })
+	}
+}
