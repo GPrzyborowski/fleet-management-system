@@ -14,6 +14,12 @@ vi.mock('../config/prisma-client', () => ({
 			findMany: vi.fn(),
 			findFirst: vi.fn(),
 			update: vi.fn(),
+			create: vi.fn(),
+		},
+		vehicles: {
+			findMany: vi.fn(),
+			findUnique: vi.fn(),
+			update: vi.fn(),
 		},
 	},
 }))
@@ -149,5 +155,170 @@ describe('PATCH /api/assignments-end/:id', () => {
 			where: { id: mockActiveAssignment.id },
 			data: expect.objectContaining({ status: 'completed' }),
 		})
+	})
+})
+
+describe('GET /api/vehicles/available', () => {
+	beforeEach(() => vi.clearAllMocks())
+
+	it('should return 200 with available vehicles', async () => {
+		vi.mocked(prisma.vehicles.findMany).mockResolvedValue([
+			{
+				id: 1,
+				license_plate: 'GD 12345',
+				brand: 'Volvo',
+				model: 'FH16',
+				year_of_manufacture: 2020,
+				current_mileage: 150000,
+				current_fuel_level: 80,
+				status: 'available',
+				created_at: new Date(),
+			},
+		])
+
+		const response = await request(app).get('/api/vehicles/available')
+
+		expect(response.status).toBe(200)
+		expect(response.body).toHaveLength(1)
+	})
+
+	it('should return empty array when no vehicles available', async () => {
+		vi.mocked(prisma.vehicles.findMany).mockResolvedValue([])
+
+		const response = await request(app).get('/api/vehicles/available')
+
+		expect(response.status).toBe(200)
+		expect(response.body).toHaveLength(0)
+	})
+
+	it('should return 500 on database error', async () => {
+		vi.mocked(prisma.vehicles.findMany).mockRejectedValue(new Error('DB error'))
+
+		const response = await request(app).get('/api/vehicles/available')
+
+		expect(response.status).toBe(500)
+	})
+})
+
+describe('POST /api/assignments/take/:vehicleId', () => {
+	beforeEach(() => vi.clearAllMocks())
+
+	it('should return 201 when vehicle is taken successfully', async () => {
+		vi.mocked(prisma.vehicles.findUnique).mockResolvedValue({
+			id: 1,
+			license_plate: 'GD 12345',
+			brand: 'Volvo',
+			model: 'FH16',
+			year_of_manufacture: 2020,
+			current_mileage: 150000,
+			current_fuel_level: 80,
+			status: 'available',
+			created_at: new Date(),
+		})
+		vi.mocked(prisma.vehicle_assignments.findFirst).mockResolvedValue(null)
+		vi.mocked(prisma.vehicle_assignments.create).mockResolvedValue({
+			id: 5,
+			vehicle_id: 1,
+			driver_id: 2,
+			start_time: new Date(),
+			end_time: null,
+			start_mileage: 150000,
+			end_mileage: null,
+			start_fuel_level: 80,
+			end_fuel_level: null,
+			dashboard_image_url: null,
+			status: 'active',
+		})
+		vi.mocked(prisma.vehicles.update).mockResolvedValue({
+			id: 1,
+			license_plate: 'GD 12345',
+			brand: 'Volvo',
+			model: 'FH16',
+			year_of_manufacture: 2020,
+			current_mileage: 150000,
+			current_fuel_level: 80,
+			status: 'in_use',
+			created_at: new Date(),
+		})
+
+		const response = await request(app).post('/api/assignments/take/1')
+
+		expect(response.status).toBe(201)
+		expect(response.body.message).toBe('Vehicle assigned successfully.')
+	})
+
+	it('should return 400 for invalid vehicleId', async () => {
+		const response = await request(app).post('/api/assignments/take/abc')
+
+		expect(response.status).toBe(400)
+		expect(response.body.message).toBe('Invalid data.')
+	})
+
+	it('should return 404 when vehicle not found', async () => {
+		vi.mocked(prisma.vehicles.findUnique).mockResolvedValue(null)
+
+		const response = await request(app).post('/api/assignments/take/99')
+
+		expect(response.status).toBe(404)
+		expect(response.body.message).toBe('Vehicle not found.')
+	})
+
+	it('should return 409 when vehicle is not available', async () => {
+		vi.mocked(prisma.vehicles.findUnique).mockResolvedValue({
+			id: 1,
+			license_plate: 'GD 12345',
+			brand: 'Volvo',
+			model: 'FH16',
+			year_of_manufacture: 2020,
+			current_mileage: 150000,
+			current_fuel_level: 80,
+			status: 'in_use',
+			created_at: new Date(),
+		})
+
+		const response = await request(app).post('/api/assignments/take/1')
+
+		expect(response.status).toBe(409)
+		expect(response.body.message).toBe('Vehicle is not available.')
+	})
+
+	it('should return 409 when driver already has active assignment', async () => {
+		vi.mocked(prisma.vehicles.findUnique).mockResolvedValue({
+			id: 1,
+			license_plate: 'GD 12345',
+			brand: 'Volvo',
+			model: 'FH16',
+			year_of_manufacture: 2020,
+			current_mileage: 150000,
+			current_fuel_level: 80,
+			status: 'available',
+			created_at: new Date(),
+		})
+		vi.mocked(prisma.vehicle_assignments.findFirst).mockResolvedValue({
+			id: 3,
+			vehicle_id: 2,
+			driver_id: 2,
+			start_time: new Date(),
+			end_time: null,
+			start_mileage: 89500,
+			end_mileage: null,
+			start_fuel_level: 100,
+			end_fuel_level: null,
+			dashboard_image_url: null,
+			status: 'active',
+		})
+
+		const response = await request(app).post('/api/assignments/take/1')
+
+		expect(response.status).toBe(409)
+		expect(response.body.message).toBe('You already have an active assignment.')
+	})
+
+	it('should return 500 on database error', async () => {
+		vi.mocked(prisma.vehicles.findUnique).mockRejectedValue(new Error('DB error'))
+
+		const response = await request(app).post('/api/assignments/take/1')
+
+		expect(response.status).toBe(500)
 	})
 })
