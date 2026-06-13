@@ -236,6 +236,9 @@ describe('POST /api/assignments/take/:vehicleId', () => {
 					findFirst: vi.fn().mockResolvedValue(null),
 					create: vi.fn().mockResolvedValue({}),
 				},
+				users: {
+					update: vi.fn().mockResolvedValue({}),
+				},
 			} as never)
 		})
 
