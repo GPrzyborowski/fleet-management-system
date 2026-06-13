@@ -83,14 +83,22 @@ export const addVehicle = async (req: Request, res: Response) => {
 export const deleteVehicle = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params
+
 		const assignments = await prisma.vehicle_assignments.findMany({
 			where: { vehicle_id: Number(id) },
 			select: { driver_id: true },
 		})
+
 		const driverIds = [...new Set(assignments.map(a => a.driver_id).filter((id): id is number => id !== null))]
+
+		await prisma.vehicle_assignments.deleteMany({
+			where: { vehicle_id: Number(id) },
+		})
+
 		await prisma.vehicles.delete({
 			where: { id: Number(id) },
 		})
+
 		if (driverIds.length > 0) {
 			const driversToDelete = await prisma.users.findMany({
 				where: {
@@ -106,6 +114,7 @@ export const deleteVehicle = async (req: Request, res: Response) => {
 				})
 			}
 		}
+
 		return res.status(200).json({ message: 'Vehicle deleted.' })
 	} catch (err) {
 		console.error(err)
