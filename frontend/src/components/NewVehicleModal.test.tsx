@@ -2,7 +2,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 import NewVehicleModal from './NewVehicleModal'
 
-vi.mock('flyonui/flyonui', () => ({}))
+vi.mock('flyonui/flyonui', () => ({
+	HSStaticMethods: {
+		autoInit: vi.fn(),
+	},
+	HSOverlay: {
+		close: vi.fn(),
+	},
+}))
 
 const mockAddHandler = vi.fn()
 const mockOnUpdate = vi.fn()
