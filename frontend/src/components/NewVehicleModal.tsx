@@ -47,7 +47,10 @@ export default function NewVehicleModal({ addHandler, onUpdate }: Props) {
 
 	useEffect(() => {
 		const init = async () => {
-			await import('flyonui/flyonui')
+			const flyonui = await import('flyonui/flyonui')
+			if (typeof flyonui.HSStaticMethods?.autoInit === 'function') {
+				flyonui.HSStaticMethods.autoInit()
+			}
 		}
 		init()
 	}, [])
