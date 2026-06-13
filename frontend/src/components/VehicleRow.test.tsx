@@ -14,6 +14,7 @@ const defaultProps = {
 	model: 'FH16',
 	year: 2020,
 	mileage: 150000,
+	fuelLevel: 80,
 	status: 'available',
 	removeHandler: vi.fn(),
 	updateHandler: vi.fn(),
