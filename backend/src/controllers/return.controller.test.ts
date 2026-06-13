@@ -16,12 +16,16 @@ vi.mock('../config/prisma-client', () => ({
 	default: {
 		vehicle_assignments: {
 			update: vi.fn(),
+			findFirst: vi.fn(),
 		},
 		vehicles: {
 			update: vi.fn(),
 		},
 		vehicle_status_images: {
 			findMany: vi.fn(),
+		},
+		users: {
+			update: vi.fn(),
 		},
 	},
 }))
@@ -124,8 +128,10 @@ describe('POST /api/assignments/return/:assignmentId', () => {
 
 	it('should return 200 on successful return', async () => {
 		vi.mocked(prisma.vehicle_assignments.update).mockResolvedValue(mockAssignment)
+		vi.mocked(prisma.vehicle_assignments.findFirst).mockResolvedValue(null)
 		vi.mocked(prisma.vehicles.update).mockResolvedValue(mockVehicle)
 		vi.mocked(prisma.vehicle_status_images.findMany).mockResolvedValue([])
+		vi.mocked(prisma.users.update).mockResolvedValue({} as never)
 
 		const response = await request(app)
 			.post('/api/assignments/return/1')
@@ -139,8 +145,10 @@ describe('POST /api/assignments/return/:assignmentId', () => {
 
 	it('should update assignment status to completed', async () => {
 		vi.mocked(prisma.vehicle_assignments.update).mockResolvedValue(mockAssignment)
+		vi.mocked(prisma.vehicle_assignments.findFirst).mockResolvedValue(null)
 		vi.mocked(prisma.vehicles.update).mockResolvedValue(mockVehicle)
 		vi.mocked(prisma.vehicle_status_images.findMany).mockResolvedValue([])
+		vi.mocked(prisma.users.update).mockResolvedValue({} as never)
 
 		await request(app)
 			.post('/api/assignments/return/1')
@@ -158,8 +166,10 @@ describe('POST /api/assignments/return/:assignmentId', () => {
 
 	it('should update vehicle status to available', async () => {
 		vi.mocked(prisma.vehicle_assignments.update).mockResolvedValue(mockAssignment)
+		vi.mocked(prisma.vehicle_assignments.findFirst).mockResolvedValue(null)
 		vi.mocked(prisma.vehicles.update).mockResolvedValue(mockVehicle)
 		vi.mocked(prisma.vehicle_status_images.findMany).mockResolvedValue([])
+		vi.mocked(prisma.users.update).mockResolvedValue({} as never)
 
 		await request(app)
 			.post('/api/assignments/return/1')
@@ -179,10 +189,12 @@ describe('POST /api/assignments/return/:assignmentId', () => {
 		const { damageCheckQueue } = await import('../config/queues')
 
 		vi.mocked(prisma.vehicle_assignments.update).mockResolvedValue(mockAssignment)
+		vi.mocked(prisma.vehicle_assignments.findFirst).mockResolvedValue(null)
 		vi.mocked(prisma.vehicles.update).mockResolvedValue(mockVehicle)
 		vi.mocked(prisma.vehicle_status_images.findMany).mockResolvedValue([
 			{ id: 1, vehicle_id: 1, side: 'front', azure_blob_url: 'https://example.com/front.jpg', updated_at: new Date() },
 		])
+		vi.mocked(prisma.users.update).mockResolvedValue({} as never)
 
 		await request(app)
 			.post('/api/assignments/return/1')
@@ -203,8 +215,10 @@ describe('POST /api/assignments/return/:assignmentId', () => {
 		const { damageCheckQueue } = await import('../config/queues')
 
 		vi.mocked(prisma.vehicle_assignments.update).mockResolvedValue(mockAssignment)
+		vi.mocked(prisma.vehicle_assignments.findFirst).mockResolvedValue(null)
 		vi.mocked(prisma.vehicles.update).mockResolvedValue(mockVehicle)
 		vi.mocked(prisma.vehicle_status_images.findMany).mockResolvedValue([])
+		vi.mocked(prisma.users.update).mockResolvedValue({} as never)
 
 		await request(app)
 			.post('/api/assignments/return/1')

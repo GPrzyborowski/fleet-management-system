@@ -30,6 +30,9 @@ vi.mock('../config/prisma-client', () => ({
 			findUnique: vi.fn(),
 			update: vi.fn(),
 		},
+		users: {
+			update: vi.fn(),
+		},
 	},
 }))
 
@@ -232,6 +235,9 @@ describe('POST /api/assignments/take/:vehicleId', () => {
 				vehicle_assignments: {
 					findFirst: vi.fn().mockResolvedValue(null),
 					create: vi.fn().mockResolvedValue({}),
+				},
+				users: {
+					update: vi.fn().mockResolvedValue({}),
 				},
 			} as never)
 		})
