@@ -23,11 +23,13 @@ export default function NewEmployeeModal({ addHandler, onUpdate }: Props) {
 	const [role, setRole] = useState('driver')
 
 	useEffect(() => {
-		const initFlyonUI = async () => {
-			await import('flyonui/flyonui')
+		const init = async () => {
+			const flyonui = await import('flyonui/flyonui')
+			if (typeof flyonui.HSStaticMethods?.autoInit === 'function') {
+				flyonui.HSStaticMethods.autoInit()
+			}
 		}
-
-		initFlyonUI()
+		init()
 	}, [])
 
 	return (
