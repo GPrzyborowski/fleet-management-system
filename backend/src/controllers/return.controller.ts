@@ -72,6 +72,13 @@ export const returnVehicle = async (req: Request, res: Response) => {
 			return
 		}
 
+		const activeAssignments = await prisma.vehicle_assignments.findFirst({
+			where: {
+				driver_id: assignment.driver_id,
+				end_time: null,
+			},
+		})
+
 		await prisma.vehicles.update({
 			where: { id: assignment.vehicle_id },
 			data: {
@@ -80,6 +87,13 @@ export const returnVehicle = async (req: Request, res: Response) => {
 				current_fuel_level: Number(fuelLevel),
 			},
 		})
+
+		if (!activeAssignments && assignment.driver_id) {
+			await prisma.users.update({
+				where: { id: assignment.driver_id },
+				data: { is_active: false },
+			})
+		}
 
 		const baseImages = await prisma.vehicle_status_images.findMany({
 			where: { vehicle_id: assignment.vehicle_id },

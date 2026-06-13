@@ -129,6 +129,11 @@ export const takeVehicle = async (req: Request, res: Response) => {
 					status: 'active',
 				},
 			})
+
+			await tx.users.update({
+				where: { id: driverId },
+				data: { is_active: true },
+			})
 		})
 
 		res.status(201).json({ message: 'Vehicle assigned successfully.' })
