@@ -151,17 +151,15 @@ export default function ReturnModal({ licensePlate, assignmentId, onReturn }: Pr
 		if (formData.rightImage) body.append('rightImage', formData.rightImage)
 		if (formData.backImage) body.append('backImage', formData.backImage)
 
-		try {
-			await fetch(`${API_URL}/assignments/return/${assignmentId}`, {
-				method: 'POST',
-				headers: { Authorization: `Bearer ${token}` },
-				body,
-			})
-			onReturn()
-			handleClose()
-		} catch (err) {
-			console.error(err)
-		}
+		handleClose()
+
+		fetch(`${API_URL}/assignments/return/${assignmentId}`, {
+			method: 'POST',
+			headers: { Authorization: `Bearer ${token}` },
+			body,
+		})
+			.then(() => onReturn())
+			.catch(err => console.error(err))
 	}
 
 	return (
@@ -245,7 +243,7 @@ export default function ReturnModal({ licensePlate, assignmentId, onReturn }: Pr
 							<p className="text-xs text-base-content/50">
 								If the information was read correctly, press <strong>Next</strong>.
 							</p>
-							<p className='text-xs text-base-content/50'>Otherwise, enter correct data manually above.</p>
+							<p className="text-xs text-base-content/50">Otherwise, enter correct data manually above.</p>
 						</div>
 					)}
 
