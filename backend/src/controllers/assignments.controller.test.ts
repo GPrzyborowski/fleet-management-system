@@ -5,7 +5,10 @@ import prisma from '../config/prisma-client'
 import type { vehicle_assignments } from '../generated/prisma'
 
 vi.mock('../middleware/auth', () => ({
-	default: vi.fn((req, res, next) => next()),
+	default: vi.fn((req, res, next) => {
+		req.user = { id: 2, login: 'test', role: 'driver' }
+		next()
+	}),
 }))
 
 vi.mock('../config/prisma-client', () => ({
