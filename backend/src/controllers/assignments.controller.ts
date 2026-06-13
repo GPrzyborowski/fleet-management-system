@@ -94,46 +94,50 @@ export const takeVehicle = async (req: Request, res: Response) => {
 	}
 
 	try {
-		const vehicle = await prisma.vehicles.findUnique({
-			where: { id: vehicleId },
-		})
+		await prisma.$transaction(async tx => {
+			const vehicle = await tx.vehicles.findUnique({
+				where: { id: vehicleId },
+			})
 
-		if (!vehicle) {
-			res.status(404).json({ message: 'Vehicle not found.' })
-			return
-		}
+			if (!vehicle) {
+				throw Object.assign(new Error('Vehicle not found.'), { status: 404 })
+			}
 
-		if (vehicle.status !== 'available') {
-			res.status(409).json({ message: 'Vehicle is not available.' })
-			return
-		}
+			if (vehicle.status !== 'available') {
+				throw Object.assign(new Error('Vehicle is not available.'), { status: 409 })
+			}
 
-		const existingAssignment = await prisma.vehicle_assignments.findFirst({
-			where: { driver_id: driverId, end_time: null },
-		})
+			const existingAssignment = await tx.vehicle_assignments.findFirst({
+				where: { driver_id: driverId, end_time: null },
+			})
 
-		if (existingAssignment) {
-			res.status(409).json({ message: 'You already have an active assignment.' })
-			return
-		}
+			if (existingAssignment) {
+				throw Object.assign(new Error('You already have an active assignment.'), { status: 409 })
+			}
 
-		await prisma.vehicle_assignments.create({
-			data: {
-				vehicle_id: vehicleId,
-				driver_id: driverId,
-				start_mileage: vehicle.current_mileage,
-				start_fuel_level: vehicle.current_fuel_level,
-				status: 'active',
-			},
-		})
+			await tx.vehicles.update({
+				where: { id: vehicleId, status: 'available' },
+				data: { status: 'in_use' },
+			})
 
-		await prisma.vehicles.update({
-			where: { id: vehicleId },
-			data: { status: 'in_use' },
+			await tx.vehicle_assignments.create({
+				data: {
+					vehicle_id: vehicleId,
+					driver_id: driverId,
+					start_mileage: vehicle.current_mileage,
+					start_fuel_level: vehicle.current_fuel_level,
+					status: 'active',
+				},
+			})
 		})
 
 		res.status(201).json({ message: 'Vehicle assigned successfully.' })
 	} catch (err) {
+		const error = err as Error & { status?: number }
+		if (error.status) {
+			res.status(error.status).json({ message: error.message })
+			return
+		}
 		console.error(err)
 		res.status(500).json({ error: 'Server error.' })
 	}
