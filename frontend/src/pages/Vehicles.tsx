@@ -99,45 +99,43 @@ export default function Vehicles() {
 		<PageTransition>
 			<Header text="Vehicles" />
 			<div className="w-full px-4 sm:px-12 lg:px-24 xl:px-32 overflow-x-auto flex flex-col justify-center">
+				<div className="flex justify-end mb-4">
+					<NewVehicleModal addHandler={addVehicle} onUpdate={() => setRefreshTrigger(prev => prev + 1)} />
+				</div>
 				{pending ? (
 					<div className="flex justify-center">
 						<span className="loading loading-spinner loading-xl"></span>
 					</div>
 				) : (
-					<>
-						<div className="flex justify-end mb-4">
-							<NewVehicleModal addHandler={addVehicle} onUpdate={() => setRefreshTrigger(prev => prev + 1)} />
-						</div>
-						<table className="table">
-							<thead>
-								<tr>
-									<th>License plate</th>
-									<th>Brand and model</th>
-									<th>Year</th>
-									<th>Mileage</th>
-									<th>Status</th>
-								</tr>
-							</thead>
-							<tbody>
-								{vehicles.map(vehicle => (
-									<VehicleRow
-										key={vehicle.id}
-										id={vehicle.id}
-										licensePlate={vehicle.license_plate}
-										brand={vehicle.brand}
-										model={vehicle.model}
-										year={vehicle.year_of_manufacture}
-										mileage={vehicle.current_mileage}
-										fuelLevel={vehicle.current_fuel_level}
-										status={vehicle.status}
-										removeHandler={removeVehicle}
-										updateHandler={updateVehicle}
-										onUpdate={() => setRefreshTrigger(prev => prev + 1)}
-									/>
-								))}
-							</tbody>
-						</table>
-					</>
+					<table className="table">
+						<thead>
+							<tr>
+								<th>License plate</th>
+								<th>Brand and model</th>
+								<th>Year</th>
+								<th>Mileage</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{vehicles.map(vehicle => (
+								<VehicleRow
+									key={vehicle.id}
+									id={vehicle.id}
+									licensePlate={vehicle.license_plate}
+									brand={vehicle.brand}
+									model={vehicle.model}
+									year={vehicle.year_of_manufacture}
+									mileage={vehicle.current_mileage}
+									fuelLevel={vehicle.current_fuel_level}
+									status={vehicle.status}
+									removeHandler={removeVehicle}
+									updateHandler={updateVehicle}
+									onUpdate={() => setRefreshTrigger(prev => prev + 1)}
+								/>
+							))}
+						</tbody>
+					</table>
 				)}
 			</div>
 		</PageTransition>
