@@ -3,10 +3,12 @@ import OpenAI from 'openai'
 import prisma from '../config/prisma-client'
 import { sendDamageAlert } from '../config/mailer'
 
-const connection = {
-	host: process.env.REDIS_HOST ?? 'localhost',
-	port: Number(process.env.REDIS_PORT ?? 6379),
-}
+const connection = process.env.REDIS_URL
+	? { url: process.env.REDIS_URL }
+	: {
+			host: process.env.REDIS_HOST ?? 'localhost',
+			port: Number(process.env.REDIS_PORT ?? 6379),
+		}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 

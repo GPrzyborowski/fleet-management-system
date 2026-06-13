@@ -2,15 +2,18 @@
 	"name": "backend",
 	"version": "1.0.0",
 	"description": "",
-	"main": "app.js",
+	"main": "server.js",
 	"scripts": {
 		"dev": "ts-node-dev --respawn --transpile-only src/server.ts",
 		"build": "tsc",
-		"start": "node dist/app.js",
+		"start": "node dist/server.js",
 		"test": "vitest",
 		"test:run": "vitest run",
 		"test:coverage": "vitest run --coverage",
 		"lint": "eslint ."
+	},
+	"prisma": {
+		"seed": "tsx prisma/seed.ts"
 	},
 	"keywords": [],
 	"author": "Gabriel Przyborowski",
