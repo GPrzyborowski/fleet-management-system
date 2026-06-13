@@ -1,5 +1,6 @@
 import express from 'express'
 import auth from '../middleware/auth'
+import requireRole from '../middleware/requireRole'
 import {
 	getAssignmentsForVehicle,
 	endAssignment,
@@ -10,10 +11,10 @@ import {
 
 const router = express.Router()
 
-router.get('/assignments-vehicle/:id', getAssignmentsForVehicle)
-router.patch('/assignments-end/:id', endAssignment)
-router.get('/assignments', auth, getActiveAssignmentsForEmployee)
-router.get('/vehicles/available', auth, getAvailableVehicles)
-router.post('/assignments/take/:vehicleId', auth, takeVehicle)
+router.get('/assignments-vehicle/:id', auth, requireRole('manager'), getAssignmentsForVehicle)
+router.patch('/assignments-end/:id', auth, requireRole('manager'), endAssignment)
+router.get('/assignments', auth, requireRole('driver'), getActiveAssignmentsForEmployee)
+router.get('/vehicles/available', auth, requireRole('driver'), getAvailableVehicles)
+router.post('/assignments/take/:vehicleId', auth, requireRole('driver'), takeVehicle)
 
 export default router
