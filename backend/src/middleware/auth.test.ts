@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import prisma from '../config/prisma-client'
 import auth from './auth'
 
 vi.mock('../config/prisma-client', () => ({
