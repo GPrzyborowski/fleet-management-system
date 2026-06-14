@@ -44,11 +44,22 @@ vi.mock('../components/EmployeeRow', () => ({
 	),
 }))
 
-const mockAddHandler = vi.fn()
-const mockOnUpdate = vi.fn()
-
 vi.mock('../components/NewEmployeeModal', () => ({
-	default: ({ addHandler, onUpdate }: { addHandler: typeof mockAddHandler; onUpdate: typeof mockOnUpdate }) => (
+	default: ({
+		addHandler,
+		onUpdate,
+	}: {
+		addHandler: (
+			login: string,
+			firstName: string,
+			lastName: string,
+			email: string,
+			password: string,
+			phone: string,
+			role: string,
+		) => void
+		onUpdate: () => void
+	}) => (
 		<div>
 			<div>New employee modal</div>
 			<button
