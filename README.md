@@ -176,6 +176,7 @@ cd fleet-management-system
 ```bash
 cp backend/.env.example backend/.env
 # Fill in the required values in backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
 3. Start the database and Redis:
@@ -198,7 +199,7 @@ npx prisma db seed
 npm run dev
 ```
 
-1. Start the frontend:
+6. Start the frontend:
 
 ```bash
 cd frontend
@@ -227,6 +228,13 @@ DAMAGE_ALERT_EMAIL=
 FRONTEND_URL=http://localhost:5173
 REDIS_HOST=localhost
 REDIS_PORT=6379
+```
+
+Create a `frontend/.env` file based on `.env.example`:
+
+```env
+VITE_API_URL=http://localhost:3000/api
+VITE_SOCKET_URL=http://localhost:3000
 ```
 
 ---
