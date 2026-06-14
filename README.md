@@ -145,12 +145,12 @@ erDiagram
         String image_type
     }
 
-    users ||--o{ vehicle_assignments : "driver_id"
-    vehicles ||--o{ vehicle_assignments : "vehicle_id"
-    vehicles ||--o{ vehicle_status_images : "vehicle_id"
-    vehicles ||--o{ vehicle_incidents : "vehicle_id"
-    vehicle_assignments ||--o{ vehicle_incidents : "assignment_id"
-    vehicle_incidents ||--o{ vehicle_incident_images : "incident_id"
+    users ||--o{ vehicle_assignments : "drives"
+    vehicles ||--o{ vehicle_assignments : "assigned to"
+    vehicles ||--o{ vehicle_status_images : "has"
+    vehicles ||--o{ vehicle_incidents : "has"
+    vehicle_assignments ||--o{ vehicle_incidents : "caused"
+    vehicle_incidents ||--o{ vehicle_incident_images : "has"
 ```
 
 ---
@@ -244,11 +244,11 @@ Railway is configured with **Wait for CI** - deployments to production only happ
 
 ## Default Credentials (seed)
 
-| Login     | Password   | Role    |
-| --------- | ---------- | ------- |
-| `admin`   | `admin` | Manager |
-| `anowak` | `admin` | Driver  |
-| `jkowalski` | `admin` | Driver  |
+| Login       | Password | Role    |
+| ----------- | -------- | ------- |
+| `admin`     | `admin`  | Manager |
+| `anowak`    | `admin`  | Driver  |
+| `jkowalski` | `admin`  | Driver  |
 
 ---
 
