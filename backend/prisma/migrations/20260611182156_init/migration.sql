@@ -52,7 +52,7 @@ CREATE TABLE "vehicle_assignments" (
     "end_mileage" INTEGER,
     "start_fuel_level" INTEGER NOT NULL,
     "end_fuel_level" INTEGER,
-    "dashboard_image_url" TEXT,
+    "dashboard_azure_blob_url" TEXT,
     "status" VARCHAR(25) DEFAULT 'active',
 
     CONSTRAINT "vehicle_assignments_pkey" PRIMARY KEY ("id")
@@ -63,7 +63,7 @@ CREATE TABLE "vehicle_status_images" (
     "id" SERIAL NOT NULL,
     "vehicle_id" INTEGER,
     "side" VARCHAR(20) NOT NULL,
-    "image_url" TEXT NOT NULL,
+    "azure_blob_url" TEXT NOT NULL,
     "updated_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "vehicle_status_images_pkey" PRIMARY KEY ("id")
@@ -101,7 +101,7 @@ CREATE TABLE "vehicle_incident_images" (
     "id" SERIAL NOT NULL,
     "incident_id" INTEGER NOT NULL,
     "side" TEXT NOT NULL,
-    "image_url" TEXT NOT NULL,
+    "azure_blob_url" TEXT NOT NULL,
     "image_type" TEXT NOT NULL,
 
     CONSTRAINT "vehicle_incident_images_pkey" PRIMARY KEY ("id")
