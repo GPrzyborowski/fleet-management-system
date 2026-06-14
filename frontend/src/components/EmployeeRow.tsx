@@ -80,10 +80,6 @@ export default function EmployeeRow({
 					onClick={() => removeHandler(id)}>
 					<span className="icon-[tabler--trash] size-5"></span>
 				</button>
-
-				<button className="btn btn-circle btn-text btn-sm" aria-label="Show employee logs">
-					<span className="icon-[tabler--logs] size-5"></span>
-				</button>
 			</td>
 		</tr>
 	)
