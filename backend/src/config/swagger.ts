@@ -14,7 +14,7 @@ const options = {
 				description: 'Local development',
 			},
 			{
-				url: 'https://fleet-management-system-production-fcf9.up.railway.app/api',
+				url: `${process.env.BACKEND_URL ?? 'https://fleet-management-system-production-fcf9.up.railway.app'}/api`,
 				description: 'Production',
 			},
 		],
