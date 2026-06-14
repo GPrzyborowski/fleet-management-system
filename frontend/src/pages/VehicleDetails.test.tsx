@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { vi } from 'vitest'
 import VehicleDetails from './VehicleDetails'
@@ -15,6 +15,10 @@ vi.mock('../components/PageTransition', () => ({
 	default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
+vi.mock('../components/IncidentHistoryModal', () => ({
+	default: () => <div>IncidentHistoryModal</div>,
+}))
+
 const mockFetch = vi.fn()
 globalThis.fetch = mockFetch
 
@@ -28,6 +32,14 @@ const vehicleState = {
 	status: 'available',
 }
 
+const mockIncident = {
+	id: 1,
+	ai_description: 'Scratch detected.',
+	status: 'pending',
+	created_at: '2025-01-10T10:00:00',
+	vehicle_incident_images: [{ id: 1, side: 'front', image_url: 'https://example.com/front.jpg', image_type: 'new' }],
+}
+
 function renderVehicleDetails(state = vehicleState) {
 	mockFetch.mockResolvedValue({
 		ok: true,
@@ -36,6 +48,23 @@ function renderVehicleDetails(state = vehicleState) {
 
 	return render(
 		<MemoryRouter initialEntries={[{ pathname: '/vehicles/1', state }]}>
+			<Routes>
+				<Route path="/vehicles/:id" element={<VehicleDetails />} />
+			</Routes>
+		</MemoryRouter>,
+	)
+}
+
+function renderWithIncidents() {
+	mockFetch.mockImplementation(async (url: string) => {
+		if (String(url).includes('/incidents') && !String(url).includes('/all')) {
+			return { ok: true, json: async () => [mockIncident] }
+		}
+		return { ok: true, json: async () => ({ assignments: [], assigned: null }) }
+	})
+
+	return render(
+		<MemoryRouter initialEntries={[{ pathname: '/vehicles/1', state: vehicleState }]}>
 			<Routes>
 				<Route path="/vehicles/:id" element={<VehicleDetails />} />
 			</Routes>
@@ -102,5 +131,101 @@ describe('VehicleDetails', () => {
 	it('renders AssignmentsModal', () => {
 		renderVehicleDetails()
 		expect(screen.getByText('AssignmentsModal')).toBeInTheDocument()
+	})
+
+	it('renders IncidentHistoryModal', () => {
+		renderVehicleDetails()
+		expect(screen.getByText('IncidentHistoryModal')).toBeInTheDocument()
+	})
+
+	it('renders Everything OK badge when no incidents', async () => {
+		renderVehicleDetails()
+		await waitFor(() => {
+			expect(screen.getByText('Everything OK')).toBeInTheDocument()
+		})
+	})
+
+	it('renders Damage detected button when incidents exist', async () => {
+		renderWithIncidents()
+		await waitFor(() => {
+			expect(screen.getByRole('button', { name: /damage detected/i })).toBeInTheDocument()
+		})
+	})
+
+	it('opens damage report modal on Damage detected click', async () => {
+		renderWithIncidents()
+		await waitFor(() => {
+			expect(screen.getByRole('button', { name: /damage detected/i })).toBeInTheDocument()
+		})
+		fireEvent.click(screen.getByRole('button', { name: /damage detected/i }))
+		expect(screen.getByText('Damage Report')).toBeInTheDocument()
+		expect(screen.getByText('Scratch detected.')).toBeInTheDocument()
+	})
+
+	it('closes damage report modal on X click', async () => {
+		renderWithIncidents()
+		await waitFor(() => {
+			expect(screen.getByRole('button', { name: /damage detected/i })).toBeInTheDocument()
+		})
+		fireEvent.click(screen.getByRole('button', { name: /damage detected/i }))
+		expect(screen.getByText('Damage Report')).toBeInTheDocument()
+		fireEvent.click(screen.getAllByRole('button').find(btn => btn.querySelector('.icon-\\[tabler--x\\]'))!)
+		expect(screen.queryByText('Damage Report')).not.toBeInTheDocument()
+	})
+
+	it('renders assigned driver when assigned', async () => {
+		mockFetch.mockImplementation(async (url: string) => {
+			if (String(url).includes('/assignments-vehicle')) {
+				return {
+					ok: true,
+					json: async () => ({
+						assignments: [],
+						assigned: { id: 1, users: { first_name: 'Jan', last_name: 'Kowalski' } },
+					}),
+				}
+			}
+			return { ok: true, json: async () => [] }
+		})
+
+		render(
+			<MemoryRouter initialEntries={[{ pathname: '/vehicles/1', state: vehicleState }]}>
+				<Routes>
+					<Route path="/vehicles/:id" element={<VehicleDetails />} />
+				</Routes>
+			</MemoryRouter>,
+		)
+
+		await waitFor(() => {
+			expect(screen.getByText(/Jan/)).toBeInTheDocument()
+		})
+	})
+
+	it('renders Not assigned when no assigned driver', async () => {
+		renderVehicleDetails()
+		await waitFor(() => {
+			expect(screen.getByText('Not assigned')).toBeInTheDocument()
+		})
+	})
+
+	it('calls withdraw from fleet on button click', async () => {
+		renderVehicleDetails()
+		fireEvent.click(screen.getByRole('button', { name: /withdraw from fleet/i }))
+		await waitFor(() => {
+			expect(mockFetch).toHaveBeenCalledWith(
+				expect.stringContaining('/vehicles/1/withdraw'),
+				expect.objectContaining({ method: 'PATCH' }),
+			)
+		})
+	})
+
+	it('calls return to fleet on button click', async () => {
+		renderVehicleDetails({ ...vehicleState, status: 'unavailable' })
+		fireEvent.click(screen.getByRole('button', { name: /return to fleet/i }))
+		await waitFor(() => {
+			expect(mockFetch).toHaveBeenCalledWith(
+				expect.stringContaining('/vehicles/1/return'),
+				expect.objectContaining({ method: 'PATCH' }),
+			)
+		})
 	})
 })
