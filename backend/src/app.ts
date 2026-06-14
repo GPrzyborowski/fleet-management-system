@@ -8,6 +8,8 @@ import assignments from './routes/assignments.routes'
 import password from './routes/password.routes'
 import media from './routes/media.routes'
 import returnRoutes from './routes/return.routes'
+import swaggerUi from 'swagger-ui-express'
+import { swaggerSpec } from './config/swagger'
 
 const app = express()
 
@@ -50,5 +52,6 @@ app.use('/api', assignments)
 app.use('/api', password)
 app.use('/api', media)
 app.use('/api', returnRoutes)
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 export default app
