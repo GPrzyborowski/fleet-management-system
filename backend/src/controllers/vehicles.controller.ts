@@ -67,7 +67,7 @@ export const addVehicle = async (req: Request, res: Response) => {
 					data: {
 						vehicle_id: vehicle.id,
 						side,
-						azure_blob_url: url,
+						image_url: url,
 					},
 				})
 			}

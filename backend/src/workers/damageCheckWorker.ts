@@ -22,12 +22,12 @@ export const startDamageCheckWorker = () => {
 				assignmentId: number
 				vehicleId: number
 				newImages: Record<string, string>
-				baseImages: { side: string; azure_blob_url: string }[]
+				baseImages: { side: string; image_url: string }[]
 			}
 
 			const baseMap: Record<string, string> = {}
 			for (const img of baseImages) {
-				baseMap[img.side] = img.azure_blob_url
+				baseMap[img.side] = img.image_url
 			}
 
 			const imageContent: OpenAI.Chat.ChatCompletionContentPart[] = []
@@ -109,7 +109,7 @@ export const startDamageCheckWorker = () => {
 						data: {
 							incident_id: incident.id,
 							side,
-							azure_blob_url: newImages[side],
+							image_url: newImages[side],
 							image_type: 'new',
 						},
 					})
@@ -119,7 +119,7 @@ export const startDamageCheckWorker = () => {
 						data: {
 							incident_id: incident.id,
 							side,
-							azure_blob_url: baseMap[side],
+							image_url: baseMap[side],
 							image_type: 'base',
 						},
 					})

@@ -6,7 +6,7 @@ export type IncidentData = {
 	vehicle_incident_images: {
 		id: number
 		side: string
-		azure_blob_url: string
+		image_url: string
 		image_type: string
 	}[]
 }

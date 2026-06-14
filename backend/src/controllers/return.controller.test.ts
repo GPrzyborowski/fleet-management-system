@@ -192,7 +192,7 @@ describe('POST /api/assignments/return/:assignmentId', () => {
 		vi.mocked(prisma.vehicle_assignments.findFirst).mockResolvedValue(null)
 		vi.mocked(prisma.vehicles.update).mockResolvedValue(mockVehicle)
 		vi.mocked(prisma.vehicle_status_images.findMany).mockResolvedValue([
-			{ id: 1, vehicle_id: 1, side: 'front', azure_blob_url: 'https://example.com/front.jpg', updated_at: new Date() },
+			{ id: 1, vehicle_id: 1, side: 'front', image_url: 'https://example.com/front.jpg', updated_at: new Date() },
 		])
 		vi.mocked(prisma.users.update).mockResolvedValue({} as never)
 
