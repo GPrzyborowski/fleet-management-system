@@ -27,6 +27,9 @@ vi.mock('../config/prisma-client', () => ({
 			findMany: vi.fn(),
 			deleteMany: vi.fn(),
 		},
+		vehicle_incidents: {
+			findMany: vi.fn(),
+		},
 		users: {
 			findMany: vi.fn(),
 			deleteMany: vi.fn(),
@@ -208,5 +211,37 @@ describe('PATCH /api/vehicles/:id', () => {
 
 		expect(response.status).toBe(500)
 		expect(response.body.message).toBe('Server error.')
+	})
+})
+
+describe('PATCH /api/vehicles/:id/return', () => {
+	beforeEach(() => vi.clearAllMocks())
+
+	it('should return 200 when vehicle is returned to fleet', async () => {
+		vi.mocked(prisma.vehicles.update).mockResolvedValue(mockVehicle)
+
+		const response = await request(app).patch('/api/vehicles/1/return').set('Authorization', 'Bearer test-token')
+
+		expect(response.status).toBe(200)
+		expect(response.body.message).toBe('Vehicle returned to fleet.')
+		expect(prisma.vehicles.update).toHaveBeenCalledWith({
+			where: { id: 1 },
+			data: { status: 'available' },
+		})
+	})
+
+	it('should return 400 for invalid id', async () => {
+		const response = await request(app).patch('/api/vehicles/abc/return').set('Authorization', 'Bearer test-token')
+
+		expect(response.status).toBe(400)
+		expect(response.body.message).toBe('Invalid data.')
+	})
+
+	it('should return 500 on database error', async () => {
+		vi.mocked(prisma.vehicles.update).mockRejectedValue(new Error('DB error'))
+
+		const response = await request(app).patch('/api/vehicles/1/return').set('Authorization', 'Bearer test-token')
+
+		expect(response.status).toBe(500)
 	})
 })
