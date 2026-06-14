@@ -97,7 +97,7 @@ export const returnVehicle = async (req: Request, res: Response) => {
 
 		const baseImages = await prisma.vehicle_status_images.findMany({
 			where: { vehicle_id: assignment.vehicle_id },
-			select: { side: true, azure_blob_url: true },
+			select: { side: true, image_url: true },
 		})
 
 		if (baseImages.length > 0) {

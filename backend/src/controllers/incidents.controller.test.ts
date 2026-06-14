@@ -32,8 +32,8 @@ const mockIncident = {
 	status: 'pending',
 	created_at: new Date('2025-01-01T10:00:00'),
 	vehicle_incident_images: [
-		{ id: 1, incident_id: 1, side: 'left', azure_blob_url: 'https://example.com/left.jpg', image_type: 'new' },
-		{ id: 2, incident_id: 1, side: 'left', azure_blob_url: 'https://example.com/left-base.jpg', image_type: 'base' },
+		{ id: 1, incident_id: 1, side: 'left', image_url: 'https://example.com/left.jpg', image_type: 'new' },
+		{ id: 2, incident_id: 1, side: 'left', image_url: 'https://example.com/left-base.jpg', image_type: 'base' },
 	],
 }
 

@@ -57,7 +57,7 @@ export default function IncidentHistoryModal({ incidents }: Props) {
 											{img.image_type === 'base' ? 'Reference' : 'After trip'} - {img.side}
 										</p>
 										<img
-											src={img.azure_blob_url}
+											src={img.image_url}
 											alt={`${img.image_type} ${img.side}`}
 											className="rounded w-full object-cover aspect-video"
 										/>

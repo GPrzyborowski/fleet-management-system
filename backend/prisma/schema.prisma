@@ -59,7 +59,7 @@ model vehicle_status_images {
   id             Int       @id @default(autoincrement())
   vehicle_id     Int?
   side           String    @db.VarChar(20)
-  azure_blob_url String
+  image_url      String
   updated_at     DateTime? @default(now()) @db.Timestamp(6)
   vehicles       vehicles? @relation(fields: [vehicle_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -82,7 +82,7 @@ model vehicle_incident_images {
   id                Int               @id @default(autoincrement())
   incident_id       Int
   side              String
-  azure_blob_url    String
+  image_url         String
   image_type        String
   vehicle_incidents vehicle_incidents @relation(fields: [incident_id], references: [id], onDelete: Cascade)
 }

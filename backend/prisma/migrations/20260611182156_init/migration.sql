@@ -63,7 +63,7 @@ CREATE TABLE "vehicle_status_images" (
     "id" SERIAL NOT NULL,
     "vehicle_id" INTEGER,
     "side" VARCHAR(20) NOT NULL,
-    "azure_blob_url" TEXT NOT NULL,
+    "image_url" TEXT NOT NULL,
     "updated_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "vehicle_status_images_pkey" PRIMARY KEY ("id")
@@ -101,7 +101,7 @@ CREATE TABLE "vehicle_incident_images" (
     "id" SERIAL NOT NULL,
     "incident_id" INTEGER NOT NULL,
     "side" TEXT NOT NULL,
-    "azure_blob_url" TEXT NOT NULL,
+    "image_url" TEXT NOT NULL,
     "image_type" TEXT NOT NULL,
 
     CONSTRAINT "vehicle_incident_images_pkey" PRIMARY KEY ("id")
