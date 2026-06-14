@@ -12,6 +12,11 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - fleet-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U admin -d fleet_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis-cache:
     image: redis:7-alpine
@@ -20,6 +25,11 @@ services:
       - '6379:6379'
     networks:
       - fleet-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
