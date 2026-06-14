@@ -252,6 +252,15 @@ Railway is configured with **Wait for CI** - deployments to production only happ
 
 ---
 
+## API Documentation
+
+Interactive API documentation is available via Swagger UI:
+
+- **Local:** http://localhost:3000/api/docs
+- **Production:** https://fleet-management-system-production-fcf9.up.railway.app/api/docs
+
+---
+
 ## License
 
 MIT
