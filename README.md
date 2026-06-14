@@ -63,31 +63,15 @@ A full-stack web application for managing a logistics fleet. The system supports
 
 ## Architecture
 
-```
-┌─────────────────┐         ┌──────────────────┐
-│    Frontend     │ ──────► │    Backend API   │
-│  React + Vite   │ ◄────── │  Express + TS    │
-└─────────────────┘         └────────┬─────────┘
-                                     │
-              ┌──────────────────────┼──────────────────────┐
-              │                      │                      │
-     ┌────────▼───────┐   ┌──────────▼───────┐   ┌──────────▼──────┐
-     │   PostgreSQL   │   │     Redis        │   │   Cloudinary    │
-     │   (Prisma)     │   │   (BullMQ)       │   │  (Image Store)  │
-     └────────────────┘   └──────────┬───────┘   └─────────────────┘
-                                     │
-                          ┌──────────▼────────┐
-                          │   BullMQ Workers  │
-                          │  - Dashboard OCR  │
-                          │  - Damage Check   │
-                          └──────────┬────────┘
-                                     │
-                    ┌────────────────┼─────────────────┐
-                    │                                  │
-          ┌─────────▼────────┐             ┌──────────▼──────┐
-          │   OpenAI GPT-4o  │             │     Resend      │
-          │  (OCR + Damage)  │             │    (Emails)     │
-          └──────────────────┘             └─────────────────┘
+```mermaid
+graph TD
+    Frontend["Frontend\nReact + Vite"] <--> Backend["Backend API\nExpress + TS"]
+    Backend --> PostgreSQL["PostgreSQL\n(Prisma)"]
+    Backend --> Redis["Redis\n(BullMQ)"]
+    Backend --> Cloudinary["Cloudinary\n(Image Store)"]
+    Redis --> Workers["BullMQ Workers\n- Dashboard OCR\n- Damage Check"]
+    Workers --> OpenAI["OpenAI GPT-4o\n(OCR + Damage)"]
+    Workers --> Resend["Resend\n(Emails)"]
 ```
 
 ---
